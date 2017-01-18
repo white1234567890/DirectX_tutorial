@@ -280,8 +280,8 @@ bool CreateMainWindow(HWND &hwnd, HINSTANCE hInstance , int nCmdShow)
 		WS_OVERLAPPEDWINDOW,	//Window style
 		CW_USEDEFAULT,			//Default of window horizontal location
 		CW_USEDEFAULT,			//Default of window vertical locaiton
-		WINDOW_WIDTH,				//Window horizontal size
-		WINDOW_HEIGHT,			//Window vertical size
+		GAME_WIDTH,				//Window horizontal size
+		GAME_HEIGHT,			//Window vertical size
 		(HWND)NULL,				//Nothing parent window
 		(HMENU)NULL,				//Nothing menu
 		hInstance,					//Handle to apprication instance
@@ -301,8 +301,8 @@ bool CreateMainWindow(HWND &hwnd, HINSTANCE hInstance , int nCmdShow)
 
 		//Redraw window
 		MoveWindow(hwnd,
-			0,																		//Left
-			0,																		//Top
+			0,													//Left
+			0,													//Top
 			GAME_WIDTH + (GAME_WIDTH - clientRect.right),		//Right
 			GAME_HEIGHT + (GAME_HEIGHT - clientRect.bottom),	//Bottom
 			TRUE);

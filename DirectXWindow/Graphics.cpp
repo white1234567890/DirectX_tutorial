@@ -26,45 +26,8 @@ Graphics::~Graphics(void)
 	releaseAll();
 }
 
-//////////////////////////////////////////////////////////////////////////////
-//Release all	
-//////////////////////////////////////////////////////////////////////////////
-void Graphics::releaseAll()
-{
-	SAFE_RELEASE(device3d);
-	SAFE_RELEASE(direct3d);
-}
-
-//////////////////////////////////////////////////////////////////////////////
-//Initialize DirectX graphics
-//When detect error, throw GameError
-//////////////////////////////////////////////////////////////////////////////
-void Graphics::initialize(HWND hw, int w, int h, bool full)
-{
-	hwnd = hw;
-	width = w;
-	height = h;
-	fullscreen = full;
-	
-	//Initialize Direct3D
-	direct3d = Direct3DCreate9(D3D_SDK_VERSION);
-	if(direct3d == NULL)
-	{
-		throw(GameError(gameErrorNS::FATAL_ERROR, "Error initializing Direct3D"));
-	}
-
-	//Initialize D3DPresentationParameter
-	initD3Dpp();
-
-	//Create Direct3D device
-	result = direct3d->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hwnd,
-		D3DCREATE_SOFTWARE_VERTEXPROCESSING,//If graphics card don't support hardware vertex processing, use "D3DCREATE_HARDWARE_VERTEXPRICESSING"
-		&d3dpp, &device3d);
-	if(FAILED(result))
-	{
-		throw(GameError(gameErrorNS::FATAL_ERROR, "Error creatind Direct3D device"));
-	}
-}
+//Private function
+//««««««««««
 
 //////////////////////////////////////////////////////////////////////////////
 //Initialize D3DPresentatoinParameter
@@ -106,6 +69,82 @@ void Graphics::initD3Dpp()
 	}
 }
 
+//ªªªªªªªªªª
+
+//Public function
+//««««««««««
+
+//////////////////////////////////////////////////////////////////////////////
+//Release all	
+//////////////////////////////////////////////////////////////////////////////
+void Graphics::releaseAll()
+{
+	SAFE_RELEASE(device3d);
+	SAFE_RELEASE(direct3d);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//Initialize DirectX graphics
+//When detect error, throw GameError
+//////////////////////////////////////////////////////////////////////////////
+void Graphics::initialize(HWND hw, int w, int h, bool full)
+{
+	hwnd = hw;
+	width = w;
+	height = h;
+	fullscreen = full;
+	
+	//Initialize Direct3D
+	direct3d = Direct3DCreate9(D3D_SDK_VERSION);
+	if(direct3d == NULL)
+	{
+		throw(GameError(gameErrorNS::FATAL_ERROR, "Error initializing Direct3D"));
+	}
+
+	//Initialize D3DPresentationParameter
+	initD3Dpp();
+
+	//If fullscreen mode
+	if(fullscreen)
+	{
+		//Check Adapter is compatible
+		if(isAdapterCompatible())
+		{
+			//Set adapter reflesh rate
+			d3dpp.FullScreen_RefreshRateInHz = pMode.RefreshRate;
+		}
+		else
+		{
+			throw(GameError(gameErrorNS::FATAL_ERROR, "The graphics device does not support the specified resolution and/or format"));
+		}
+	}
+
+	//Check graphics card support hardware texturing, lighting, and vertex shader
+	D3DCAPS9 caps;
+	DWORD behavior;
+	result = direct3d->GetDeviceCaps(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, &caps);
+
+	//If device does not support HWtexturing and lighting, or 1.1 vertex shader, switch software vertex processing
+	if((caps.DevCaps & D3DDEVCAPS_HWTRANSFORMANDLIGHT) == 0 || caps.VertexShaderVersion < D3DVS_VERSION(1,1))
+	{
+		//Process software only
+		behavior = D3DCREATE_SOFTWARE_VERTEXPROCESSING;
+	}
+	else
+	{
+		//Process hardware only
+		behavior = D3DCREATE_HARDWARE_VERTEXPROCESSING;
+	}
+
+	//Create Direct3D device
+	result = direct3d->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hwnd, behavior, &d3dpp, &device3d);
+	if(FAILED(result))
+	{
+		throw(GameError(gameErrorNS::FATAL_ERROR, "Error creatind Direct3D device"));
+	}
+}
+
+
 HRESULT Graphics::showBackbuffer()
 {
 	result = E_FAIL;//Default is error. Replace when success
@@ -119,3 +158,24 @@ HRESULT Graphics::showBackbuffer()
 	
 	return result;
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+//Check adapter and, check BackBuffer height, width and refresh rate specified by d3dpp supported
+//If supported adapter was discovered, set proper format to pMode
+//Before run	: d3dpp was initialized
+//After run		: If discoverd proper format and set it to pMode, return true, else return false
+///////////////////////////////////////////////////////////////////////////////////////////////////
+bool Graphics::isAdapterCompatible()
+{
+	UINT modes = direct3d->GetAdapterModeCount(D3DADAPTER_DEFAULT, d3dpp.BackBufferFormat);
+	for (unsigned int i = 0; i < modes; i++)
+	{
+		result = direct3d->EnumAdapterModes(D3DADAPTER_DEFAULT, d3dpp.BackBufferFormat, i, &pMode);
+
+		if(pMode.Height == d3dpp.BackBufferHeight && pMode.Width == d3dpp.BackBufferWidth && pMode.RefreshRate == d3dpp.FullScreen_RefreshRateInHz) return true;
+	}
+
+	return false;
+}
+
+//ªªªªªªªªªª

@@ -30,6 +30,7 @@ private:
 	LP_3D direct3d;
 	LP_3DDEVICE device3d;
 	D3DPRESENT_PARAMETERS d3dpp;
+	D3DDISPLAYMODE pMode;
 
 	//Variavles
 	HRESULT result;	//Windows default return code
@@ -63,5 +64,11 @@ public:
 
 	//Draw off screen back buffer on display using page flipping
 	HRESULT showBackbuffer();
+
+	//Check adapter and, check BackBuffer height, width and refresh rate specified by d3dpp supported
+	//If supported adapter was discovered, set proper format to pMode
+	//Before run	: d3dpp was initialized
+	//After run		: If discoverd proper format and set it to pMode, return true, else return false
+	bool isAdapterCompatible();
 };
 
