@@ -8,10 +8,16 @@
 
 *.suo
 
+*.v11.suo
 *.user
 
 *.sln
 .docstates
+*.vcxproj
+
+*.vcxproj.filters
+*.sdf
+*.opensdf
 
 
 
@@ -111,11 +117,7 @@ ipch/
 
 *.vspx
 
-*.vcxproj
 
-*.vcxproj.filters
-*.sdf
-*.sln
 
 
 
