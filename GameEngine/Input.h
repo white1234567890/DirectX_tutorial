@@ -4,20 +4,29 @@
 //LastUpdate 2017/1/19
 
 #pragma once
+#define WIN32_LEAN_AND_MEAN
+
 #include <Windows.h>
+#include <windowsx.h>
 #include <XInput.h>
+#include "constants.h"
 #include "GameError.h"
 
+//for high-definition mouse
 
+#ifndef HID_USAGE_PAGE_GENERIC
 #define HID_USAGE_PAGE_GENERIC ((USHORT) 0x01)
+#endif // HID_USAGE_PAGE_GENERIC
+#ifndef HID_USAGE_GENERIC_MOUSE
 #define HID_USAGE_GENERIC_MOUSE ((USHORT) 0x02)
+#endif // HID_USAGE_GENERIC_MOUSE
 
 namespace inputNS
 {
-	const int KEYS_ARRAY_LEN = 255;
+	const int KEYS_ARRAY_LEN = 256;
 }
 
-const int MAX_CONTROLLERS = 4;
+const int MAX_CONTROLLERS = 1;
 
 typedef struct ControllerState
 {
@@ -60,6 +69,11 @@ public:
 	//Standard mouse bihavior do not need mouse capture
 	void initialize(HWND hwnd, bool capture);
 
-	void checkController();
+	void keyDown(WPARAM wParam);
+	void keyUp(WPARAM wParam);
+	void keyIn(WPARAM wParam);
+	bool isKeyDown(UCHAR vkey) const;
+
+	void checkControllers();
 };
 

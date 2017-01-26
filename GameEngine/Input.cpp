@@ -47,6 +47,9 @@ Input::~Input(void)
 	if(mouseCaptured) ReleaseCapture();	//Release mouse
 }
 
+//Public function
+//««««««««««
+
 //////////////////////////////////////////////////////////////////////////////
 //Initialize mouse and controller input
 //If you want to capture mouse, capture = true
@@ -80,3 +83,75 @@ void Input::initialize(HWND hwnd, bool capture)
 		throw(GameError(gameErrorNS::FATAL_ERROR, "Error initialize input system"));
 	}
 }
+
+//////////////////////////////////////////////////////////////////////////////
+//Set true keysDown array and keysPressed array corresponding the specified key
+//Before run : wParam store virtual key code (0 ~ 255)
+//////////////////////////////////////////////////////////////////////////////
+void Input::keyDown(WPARAM wParam)
+{
+	//Check key code is more than 0 and less than 255
+	if(wParam <inputNS::KEYS_ARRAY_LEN)
+	{
+		//If the key was pressed already, else keysDown array was deleted with clear()
+		if(keysDown[wParam]) keysPressed[wParam] = false;	//Update keysPressed array
+		else keysPressed[wParam] = true;
+
+		keysDown[wParam] = true;		//Update keysDown array
+
+		//If the key was pressed already, else keysDown array was deleted with clear()
+		//keysPressed[wParam] = true;	//Update keysPressed array
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//Set false keysDown array and keysPressed array corresponding the specified key
+//Before run : wParam store virtual key code (0 ~ 255)
+//////////////////////////////////////////////////////////////////////////////
+void Input::keyUp(WPARAM wParam)
+{
+	//Check key code is more than 0 and less than 255
+	if(wParam <inputNS::KEYS_ARRAY_LEN)
+	{
+		//Update state table
+		keysDown[wParam] = false;
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//Store input charactor in textIn array
+//Before run : wParam store charactor
+//////////////////////////////////////////////////////////////////////////////
+void Input::keyIn(WPARAM wParam)
+{
+	if(newLine)	//Start new line
+	{
+		textIn.clear();
+		newLine = false;
+	}
+	
+	if(wParam == '\b')	//If input backspace
+	{
+		//If Stored charactor in textIn
+		if(textIn.length() > 0) textIn.erase(textIn.size() - 1);	//Delete last charactor
+	}
+	else
+	{
+		textIn += wParam;
+		charIn += wParam;
+	}
+
+	if((char)wParam == '\r') newLine = true;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//If specified virtual key is pressed, return true, else return false
+//////////////////////////////////////////////////////////////////////////////
+bool Input::isKeyDown(UCHAR vkey) const
+{
+	if(vkey < inputNS::KEYS_ARRAY_LEN) return keysDown[vkey];
+	else return false;
+}
+
+
+//ªªªªªªªªªª
