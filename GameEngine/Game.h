@@ -50,7 +50,7 @@ public:
 	//Before run : hwnd is handle to window
 	virtual void initialize(HWND hwnd);
 
-	//This function run over and over again in WinMain message loop
+	//run is recurring in WinMain message loop
 	virtual void run(HWND);
 
 	//When graphic device vanished, call this function

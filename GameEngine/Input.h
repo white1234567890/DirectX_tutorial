@@ -24,6 +24,21 @@
 namespace inputNS
 {
 	const int KEYS_ARRAY_LEN = 256;
+
+	//Set All keysDown array false
+	const UCHAR KEYS_DOWN = 1;
+
+	//Set all keysPressed array false
+	const UCHAR KEYS_PRESSED = 2;
+
+	//Set mouse X and Y 0
+	const UCHAR MOUSE = 4;
+
+	//Clear input text string
+	const UCHAR TEXT_IN = 8;
+
+	//Clear all input buffer
+	const UCHAR KEYS_MOUSE_TEXT = KEYS_DOWN + KEYS_PRESSED + MOUSE + TEXT_IN;
 }
 
 const int MAX_CONTROLLERS = 1;
@@ -73,6 +88,28 @@ public:
 	void keyUp(WPARAM wParam);
 	void keyIn(WPARAM wParam);
 	bool isKeyDown(UCHAR vkey) const;
+	bool wasKeyPressed(UCHAR vkey) const;
+	bool anyKeyPressed(UCHAR vkey) const;
+	
+	//Return input text as string
+	std::string getTextIn(){return textIn;}
+
+	//Return input last charactor
+	char getCharIn(){return charIn;}
+
+	//Clear specified key pressed state
+	void clearKeyPress(UCHAR vkey);
+
+	//Clear text buffer
+	void clearTextIn(){textIn.clear();}
+	
+	//Clear specified input buffer
+	//Param what : call from input_NS, and conbine any item to use OR operator(|) 
+	//Example : input->clear(inputNS::KEYS_DOWN | input_NS::KEYS_PRESSED)
+	void clear(UCHAR what);
+
+	//Clear data keys, mouse, and input text state
+	void clearAll(){clear(inputNS::KEYS_MOUSE_TEXT);}
 
 	void checkControllers();
 };

@@ -67,7 +67,7 @@ public:
 	//Check adapter and, check BackBuffer height, width and refresh rate specified by d3dpp supported
 	//If supported adapter was discovered, set proper format to pMode
 	//Before run	: d3dpp was initialized
-	//After run		: If discoverd proper format and set it to pMode, return true, else return false
+	//After run	: If discoverd proper format and set it to pMode, return true, else return false
 	bool isAdapterCompatible();
 };
 

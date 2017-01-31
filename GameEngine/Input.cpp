@@ -153,5 +153,70 @@ bool Input::isKeyDown(UCHAR vkey) const
 	else return false;
 }
 
+//////////////////////////////////////////////////////////////////////////////
+//If specified key was pressed in last frame, return true
+//When exit frame, keys pressed state was deleted
+//////////////////////////////////////////////////////////////////////////////
+bool Input::wasKeyPressed(UCHAR vkey) const
+{
+	if(vkey < inputNS::KEYS_ARRAY_LEN) return keysPressed[vkey];
+	else return false;
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+//If any key was pressed in last frame, return true
+//When exit frame, keys pressed state was deleted
+//////////////////////////////////////////////////////////////////////////////
+bool Input::anyKeyPressed(UCHAR vkey) const
+{
+	for(size_t i = 0; i < inputNS::KEYS_ARRAY_LEN; i++)
+	{
+		if(keysPressed[i] == true) return true;
+	}
+	return false;
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+//Clear specified key pressed state
+//////////////////////////////////////////////////////////////////////////////
+void Input::clearKeyPress(UCHAR vkey)
+{
+	if(vkey < inputNS::KEYS_ARRAY_LEN) keysPressed[vkey] = false;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//Clear specified input buffer
+//////////////////////////////////////////////////////////////////////////////
+void Input::clear(UCHAR what)
+{
+	//If keys are in the hold state, clear
+	if(what & inputNS::KEYS_DOWN)
+	{
+		for(size_t i = 0; i < inputNS::KEYS_ARRAY_LEN; i++) keysDown[i] = false;
+	}
+
+	//If keys are in the pressed state, clear
+	if(what & inputNS::KEYS_PRESSED)
+	{
+		for(size_t i = 0; i < inputNS::KEYS_ARRAY_LEN; i++) keysPressed[i] = false;
+	}
+
+	//If clear mouse state
+	if(what & inputNS::MOUSE)
+	{
+		mouseX = 0;
+		mouseY = 0;
+		mouseRawX = 0;
+		mouseRawY = 0;
+	}
+
+	if(what & inputNS::TEXT_IN)
+	{
+		clearTextIn();
+	}
+}
+
 
 //ªªªªªªªªªª
