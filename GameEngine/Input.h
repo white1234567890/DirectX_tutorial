@@ -1,7 +1,7 @@
 //You Oyadomari
 //Kokusai Denshi business Vocational School
 //Initial 2017/1/19
-//LastUpdate 2017/1/19
+//LastUpdate 2017/1/31
 
 #pragma once
 #define WIN32_LEAN_AND_MEAN
@@ -52,6 +52,50 @@ typedef struct ControllerState
 	bool connected;
 }ControllerState;
 
+//Dead zone
+//Left trigger, right trigger, and thumb stick are analog control
+//Left trigger and right trigger return 0~255 BYTE type
+//0 is released state, 255 is perfect pressed state
+//Thumb stick return -32768~32768 signed SHORT type about each axis
+//This value mean thumb stick location, 0 is center, negative value is left or down, positive value is right or up
+//Analog control if it is parfect released, return not 0 sometimes
+//This way, application needs dead zone if process analog data
+//Dead zone is simple threshold that defined to decide effective move
+//As long as value over dead zone, it is not considred as effective move
+//««««««««««
+
+//20% in area is default dead zone
+const DWORD GAMEPAD_THUMBSTICK_DEADZONE = 0.20f * float(0X7FFFF);
+
+//Trigger area is 0~255
+const DWORD GAMEPAD_TRIGGER_DEADZONE = 30;
+
+//ªªªªªªªªªª
+
+//Bit correspond to state.Gamepad.wButtons
+//wButtons has All buttons state
+//Each button is defined 1 bit in WORD bits
+//Specified button state is judged AND operator(&) with binary number correspond bit is 1
+//If calcuration result is true, the button is pressed
+//««««««««««
+
+const DWORD GAMEPAD_DPAD_UP = 0x0001;
+const DWORD GAMEPAD_DPAD_DOWN = 0x0002;
+const DWORD GAMEPAD_DPAD_LEFT = 0x0004;
+const DWORD GAMEPAD_DPAD_RIGHT =0x0008;
+const DWORD GAMEPAD_START_BUTTON = 0x0010;
+const DWORD GAMEPAD_BACK_BUTTON = 0x0020;
+const DWORD GAMEPAD_LEFT_THUMB = 0x0040;
+const DWORD GAMEPAD_RIGHT_THUMB = 0x0080;
+const DWORD GAMEPAD_LEFT_SHOULDER = 0x0100;
+const DWORD GAMEPAD_RIGHT_SHOULDER = 0x0200;
+const DWORD GAMEPAD_A = 0x1000;
+const DWORD GAMEPAD_B = 0x2000;
+const DWORD GAMEPAD_X = 0x4000;
+const DWORD GAMEPAD_Y = 0x8000;
+
+//ªªªªªªªªªª
+
 class Input
 {
 private:  
@@ -69,7 +113,7 @@ private:
 	bool mouseRButton;												//If mouse right button is pressed, this variable is true
 	bool mouseX1Button;											//If mouse X1 button is pressed, this variable is true
 	bool mouseX2Button;											//If mouse X2 button is pressed, this vaiable is true
-	ControllerState controllers[MAX_CONTROLLERS];	//Contrpller state	
+	ControllerState controllers[MAX_CONTROLLERS];	//Controller state	
 
 public:
 	Input(void);
@@ -84,13 +128,78 @@ public:
 	//Standard mouse bihavior do not need mouse capture
 	void initialize(HWND hwnd, bool capture);
 
+	//Specified key is in the hold state
 	void keyDown(WPARAM wParam);
+
+	//Specified key is in the release state
 	void keyUp(WPARAM wParam);
+
+	//Store input key in textIn array
 	void keyIn(WPARAM wParam);
+
+	//Specified key is in the pressed state
 	bool isKeyDown(UCHAR vkey) const;
+
+	//Specified key is in the hold state
 	bool wasKeyPressed(UCHAR vkey) const;
+
+	//Any key is in the hold state
 	bool anyKeyPressed(UCHAR vkey) const;
-	
+
+	//Mouse locatoin X and Y
+	void mouseIn(LPARAM lParam);
+
+	//High-definition mouse location X and Y
+	//This function can call when user use high-definition mouse
+	void mouseRawIn(LPARAM lParam);
+
+	//Store mouse left button state
+	void setMouseLButton(bool b){mouseLButton = b;}
+
+	//Store mouse middle button state
+	void setMouseMButton(bool b){mouseMButton = b;}
+
+	//Store mouse right button state
+	void setMouseRButton(bool b){mouseRButton = b;}
+
+	//Store mouse X buttons state
+	void setMouseXButton(WPARAM wParam)
+	{
+		mouseX1Button = (wParam & MK_XBUTTON1) ? true:false;
+		mouseX2Button = (wParam & MK_XBUTTON2) ? true:false;
+	}
+
+	//Return mouse location X coodrinate
+	int getMouseX() const {return mouseX;}
+
+	//Return mouse location Y coordinate
+	int getMouseY() const {return mouseY;}
+
+	//Return mouse moveing raw data X coordinate
+	//If move left, return value less than 0, move right, return value more than 0
+	//This function can call if user use high-definition mouse
+	int getMouseRawX() const {return mouseRawX;}
+
+	//Return mouse moveing raw data y coordinate
+	//If move up, return value less than 0, move down, return value more than 0
+	//This function can call if user use high-definition mouse
+	int getMouseRawY() const {return mouseRawY;}
+
+	//Return mouse left button state
+	bool getMouseLButton() const {return mouseLButton;}
+
+	//Return mouse middle button state
+	bool getMouseMButton() const {return mouseMButton;}
+
+	//Return mouse right button state
+	bool getMouseRButton() const {return mouseRButton;}
+
+	//Return mouse X1 button state
+	bool getMouseX1Button() const {return mouseX1Button;}
+
+	//Return mouse X2 button state
+	bool getMouseX2Button() const {return mouseX2Button;}
+
 	//Return input text as string
 	std::string getTextIn(){return textIn;}
 
@@ -112,5 +221,182 @@ public:
 	void clearAll(){clear(inputNS::KEYS_MOUSE_TEXT);}
 
 	void checkControllers();
-};
 
+	//Read all each controller state, and store them in controllers array
+	//This function add in Game::run function to called auto as game loop
+	void readControllers();
+
+	//Return specified controller state
+	//This function return controller all state
+	const ControllerState* getControllerState(UINT n)
+	{
+		if(n > MAX_CONTROLLERS - 1) n = MAX_CONTROLLERS - 1;
+		return &controllers[n];
+	}
+
+	//Return specified controller state
+	//This function retutn controller button state
+	const WORD getGamepadButtons(UINT n)
+	{
+		if(n > MAX_CONTROLLERS - 1) n = MAX_CONTROLLERS - 1;
+		return controllers[n].state.Gamepad.wButtons;
+	}
+
+	//Return value of controller n left trigger
+	BYTE getGamepadLeftTrigger(UINT n)
+	{
+		if(n > MAX_CONTROLLERS - 1) n = MAX_CONTROLLERS - 1;
+		return controllers[n].state.Gamepad.bLeftTrigger;
+	}
+
+	//Return value of controller n right trigger
+	BYTE getGamepadRightTrigger(UINT n)
+	{
+		if(n > MAX_CONTROLLERS - 1) n = MAX_CONTROLLERS - 1;
+		return controllers[n].state.Gamepad.bRightTrigger;
+	}
+
+	//Return value of controller n left thumb stick X axis
+	SHORT getGamepadThumbLX(UINT n)
+	{
+		if(n > MAX_CONTROLLERS - 1) n = MAX_CONTROLLERS - 1;
+		return controllers[n].state.Gamepad.sThumbLX;
+	}
+
+	//Return value of controller n left thumb stick Y axis
+	SHORT getGamepadThumbLY(UINT n)
+	{
+		if(n > MAX_CONTROLLERS - 1) n = MAX_CONTROLLERS - 1;
+		return controllers[n].state.Gamepad.sThumbLY;
+	}
+
+	//Return value of controller n right thumb stick X axis
+	SHORT getGamepadThumbRX(UINT n)
+	{
+		if(n > MAX_CONTROLLERS - 1) n = MAX_CONTROLLERS - 1;
+		return controllers[n].state.Gamepad.sThumbRX;
+	}
+
+	//Return value of contoller n right thumb stick Y axis
+	SHORT getGamepadThumbRY(UINT n)
+	{
+		if(n > MAX_CONTROLLERS - 1) n = MAX_CONTROLLERS - 1;
+		return controllers[n].state.Gamepad.sThumbRY;
+	}
+
+	//Test function
+	//««««««««««
+
+	//Return direction pad up of controller n
+	//If button is down, return true
+	bool getGamepadDPadUp(UINT n)
+	{
+		if(n > MAX_CONTROLLERS - 1) n = MAX_CONTROLLERS - 1;
+		return ((controllers[n].state.Gamepad.wButtons & GAMEPAD_DPAD_UP) != 0);
+	}
+
+	//Return direction pad down of controller n
+	//If button is down, return true
+	bool getGamepadDPadDown(UINT n)
+	{
+		if(n > MAX_CONTROLLERS - 1) n = MAX_CONTROLLERS - 1;
+		return ((controllers[n].state.Gamepad.wButtons & GAMEPAD_DPAD_DOWN) != 0);
+	}
+
+	//Return direction pad left of controller n
+	//If button is down, return true
+	bool getGamepadDPadLeft(UINT n)
+	{
+		if(n > MAX_CONTROLLERS - 1) n = MAX_CONTROLLERS - 1;
+		return ((controllers[n].state.Gamepad.wButtons & GAMEPAD_DPAD_LEFT) != 0);
+	}
+
+	//Return direction pad right of controller n
+	//If button is down, return true
+	bool getGamepadDPadRight(UINT n)
+	{
+		if(n > MAX_CONTROLLERS - 1) n = MAX_CONTROLLERS - 1;
+		return ((controllers[n].state.Gamepad.wButtons & GAMEPAD_DPAD_RIGHT) != 0);
+	}
+
+	//Return START button of controller n
+	//If button is down, return true
+	bool getGamepadStart(UINT n)
+	{
+		if(n > MAX_CONTROLLERS - 1) n = MAX_CONTROLLERS - 1;
+		return ((controllers[n].state.Gamepad.wButtons & GAMEPAD_START_BUTTON) != 0);
+	}
+
+	//Return BACK button of controller n
+	//If button is down, return true
+	bool getGamepadBack(UINT n)
+	{
+		if(n > MAX_CONTROLLERS - 1) n = MAX_CONTROLLERS - 1;
+		return ((controllers[n].state.Gamepad.wButtons & GAMEPAD_BACK_BUTTON) != 0);
+	}
+
+	//Return left thumb button of controller n
+	//If button is down, return true
+	bool getGamepadLeftThumb(UINT n)
+	{
+		if(n > MAX_CONTROLLERS - 1) n = MAX_CONTROLLERS - 1;
+		return ((controllers[n].state.Gamepad.wButtons & GAMEPAD_LEFT_THUMB) != 0);
+	}
+
+	//Return right thumb button of controller n
+	//If button is down, return true
+	bool getGamepadRightThumb(UINT n)
+	{
+		if(n > MAX_CONTROLLERS - 1) n = MAX_CONTROLLERS - 1;
+		return ((controllers[n].state.Gamepad.wButtons & GAMEPAD_RIGHT_THUMB) != 0);
+	}
+
+	//Return left shoulder button of controller n
+	//If button is down, return true
+	bool getGamepadLeftShoulder(UINT n)
+	{
+		if(n > MAX_CONTROLLERS - 1) n = MAX_CONTROLLERS - 1;
+		return ((controllers[n].state.Gamepad.wButtons & GAMEPAD_LEFT_SHOULDER) != 0);
+	}
+
+	//Return right shoulder button of controller n
+	//If button is down, return true
+	bool getGamepadRightShoulder(UINT n)
+	{
+		if(n > MAX_CONTROLLERS - 1) n = MAX_CONTROLLERS - 1;
+		return ((controllers[n].state.Gamepad.wButtons & GAMEPAD_RIGHT_SHOULDER) != 0);
+	}
+
+	//Return A button of controller n
+	//If button is down, return true
+	bool getGamepadA(UINT n)
+	{
+		if(n > MAX_CONTROLLERS - 1) n = MAX_CONTROLLERS - 1;
+		return ((controllers[n].state.Gamepad.wButtons & GAMEPAD_A) != 0);
+	}
+
+	//Return B button of controller n
+	//If button is down, return true
+	bool getGamepadB(UINT n)
+	{
+		if(n > MAX_CONTROLLERS - 1) n = MAX_CONTROLLERS - 1;
+		return ((controllers[n].state.Gamepad.wButtons & GAMEPAD_B) != 0);
+	}
+
+	//Return X button of controller n
+	//If button is down, return true
+	bool getGamepadX(UINT n)
+	{
+		if(n > MAX_CONTROLLERS - 1) n = MAX_CONTROLLERS - 1;
+		return ((controllers[n].state.Gamepad.wButtons & GAMEPAD_X) != 0);
+	}
+
+	//Return Y button of controller n
+	//If button is down, return true
+	bool getGamepadY(UINT n)
+	{
+		if(n > MAX_CONTROLLERS - 1) n = MAX_CONTROLLERS - 1;
+		return ((controllers[n].state.Gamepad.wButtons & GAMEPAD_Y) != 0);
+	}
+	//ªªªªªªªªªª
+};

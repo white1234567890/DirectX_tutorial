@@ -21,6 +21,7 @@ static int GAME_HEIGHT = 480;		//Game height(pixel)
 //Key mapping
 //This game use simple constant value to key mapping
 //If use variable, save key mapping to data file, can reuse it
+//««««««««««
 
 const UCHAR CONSOLE_KEY = VK_OEM_3;		//@ key
 const UCHAR ESC_KEY = VK_ESCAPE;			//Esc key
@@ -34,3 +35,5 @@ const UCHAR SHIP2_LEFT_KEY = VK_LEFT;	//Left arrow key
 const UCHAR SHIP2_RIGHT_KEY = VK_RIGHT;	//Right arrow key
 const UCHAR SHIP2_FORWARD_KEY = VK_UP;	//Up arrow key
 const UCHAR SHIP2_FIRE_KEY = VK_DOWN;		//Down arrow key
+
+//ªªªªªªªªªª

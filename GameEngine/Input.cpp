@@ -177,6 +177,31 @@ bool Input::anyKeyPressed(UCHAR vkey) const
 	return false;
 }
 
+//////////////////////////////////////////////////////////////////////////////
+//Get mouse locaton in window, storwe mouseX and mouseY
+//////////////////////////////////////////////////////////////////////////////
+void Input::mouseIn(LPARAM lParam)
+{
+	mouseX = GET_X_LPARAM(lParam);
+	mouseY = GET_Y_LPARAM(lParam);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//Get mouse raw data, store mouseRawX and mouseRawY
+//This routine can call if user use high-definition mouse
+//////////////////////////////////////////////////////////////////////////////
+void Input::mouseRawIn(LPARAM lParam)
+{
+	UINT dwSize = 40;
+	static BYTE lpb[40];
+	GetRawInputData((HRAWINPUT)lParam, RID_INPUT, lpb, &dwSize, sizeof(RAWINPUTHEADER));
+	RAWINPUT* raw = (RAWINPUT*)lpb;
+	if(raw->header.dwType == RIM_TYPEMOUSE)
+	{
+		mouseRawX = raw->data.mouse.lLastX;
+		mouseRawY = raw->data.mouse.lLastY;
+	}
+}
 
 //////////////////////////////////////////////////////////////////////////////
 //Clear specified key pressed state
@@ -217,6 +242,19 @@ void Input::clear(UCHAR what)
 		clearTextIn();
 	}
 }
+
+//Read connected controllers state
+void Input::readControllers()
+{
+	DWORD result;
+	for(DWORD i = 0; i < MAX_CONTROLLERS; i++)
+	{
+		result = XInputGetState(i, &controllers[i].state);
+		//If device is not connected
+		if(result == ERROR_DEVICE_NOT_CONNECTED) controllers[i].connected = false;
+	}
+}
+
 
 
 //ªªªªªªªªªª
