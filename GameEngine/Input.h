@@ -57,11 +57,11 @@ typedef struct ControllerState
 //Left trigger and right trigger return 0~255 BYTE type
 //0 is released state, 255 is perfect pressed state
 //Thumb stick return -32768~32768 signed SHORT type about each axis
-//This value mean thumb stick location, 0 is center, negative value is left or down, positive value is right or up
-//Analog control if it is parfect released, return not 0 sometimes
+//This value means thumb stick location, 0 is center, negative value is left or down, positive value is right or up
+//If analog control is perfectly released, return not 0 sometimes
 //This way, application needs dead zone if process analog data
-//Dead zone is simple threshold that defined to decide effective move
-//As long as value over dead zone, it is not considred as effective move
+//Dead zone is a simple threshold that defines an effective input
+//As long as value exceeds dead zone, it is considered as an effective input
 //««««««««««
 
 //20% in area is default dead zone
@@ -74,8 +74,8 @@ const DWORD GAMEPAD_TRIGGER_DEADZONE = 30;
 
 //Bit correspond to state.Gamepad.wButtons
 //wButtons has All buttons state
-//Each button is defined 1 bit in WORD bits
-//Specified button state is judged AND operator(&) with binary number correspond bit is 1
+//Each button is defined as 1 bit in WORD type bits
+//Specified button state is judged using AND operator(&) with binary number if corresponding bit is 1
 //If calcuration result is true, the button is pressed
 //««««««««««
 
@@ -222,8 +222,8 @@ public:
 
 	void checkControllers();
 
-	//Read all each controller state, and store them in controllers array
-	//This function add in Game::run function to called auto as game loop
+	//Read each controller state, and store them in controllers array
+	//This function is added in the Game::run function to be called automatically in the game loop
 	void readControllers();
 
 	//Return specified controller state
@@ -283,6 +283,44 @@ public:
 		if(n > MAX_CONTROLLERS - 1) n = MAX_CONTROLLERS - 1;
 		return controllers[n].state.Gamepad.sThumbRY;
 	}
+
+	//Vibration
+	//Xbox360 controller has motors left and right
+	//Left motor vibrates at a low frequency
+	//Right motor vibrates at a high frequency
+	//Each motor's speed can be set to substitute vibration member of ControllerState struct 0 ~ 65,535 value
+	//0 indicates that motor is disabled
+	//65,535 indicates maximum motor use
+	//It is necessary to control vibration speed and vibration time
+	//These functions set each motor's turnover rate and rotation time
+	//««««««««««
+
+	//Vibrates controller n's left motor
+	//Left motor is low frequency
+	//speed : 0 is off, 65536 is full use
+	//sec : vibration time
+	void setGamepadVibrateLeft(UINT n, WORD speed, float sec)
+	{
+		if(n > MAX_CONTROLLERS - 1) n = MAX_CONTROLLERS - 1;
+		controllers[n].vibration.wLeftMotorSpeed = speed;
+		controllers[n].vibrationTimeLeft = sec;
+	}
+
+	//Viberates controller n's right motor
+	//Right motor is high frequency
+	//speed : 0 is off, 65536 is full use
+	//sec : vibration time
+	void setGamepadVibrateRight(UINT n, WORD speed, float sec)
+	{
+		if(n > MAX_CONTROLLERS - 1) n = MAX_CONTROLLERS - 1;
+		controllers[n].vibration.wRightMotorSpeed = speed;
+		controllers[n].vibrationTimeRight = sec;
+	}
+
+	//Vibrate conected controllers
+	void vibrateControllers(float frameTime);
+
+	//ªªªªªªªªªª
 
 	//Test function
 	//««««««««««
