@@ -1,3 +1,8 @@
+//You Oyadomari
+//Kokusai Denshi business Vocational School
+//Initial 2017/1/19
+//LastUpdate 2017/2/2
+
 #include "Input.h"
 
 //////////////////////////////////////////////////////////////////////////////
@@ -255,6 +260,34 @@ void Input::readControllers()
 	}
 }
 
+//////////////////////////////////////////////////////////////////////////////
+//Vibrate connected controllers
+//////////////////////////////////////////////////////////////////////////////
+void Input::vibrateControllers(float frameTime)
+{
+	for(int i = 0; i < MAX_CONTROLLERS; i++)
+	{
+		if(controllers[i].connected)
+		{
+			//left motor
+			controllers[i].vibrationTimeLeft -= frameTime;
+			if(controllers[i].vibrationTimeLeft < 0)
+			{
+				controllers[i].vibrationTimeLeft = 0;
+				controllers[i].vibration.wLeftMotorSpeed = 0;
+			}
 
+			//Right motor
+			controllers[i].vibrationTimeRight -= frameTime;
+			if(controllers[i].vibrationTimeLeft < 0)
+			{
+				controllers[i].vibrationTimeRight = 0;
+				controllers[i].vibration.wRightMotorSpeed = 0;
+			}
+
+			XInputSetState(i, &controllers[i].vibration);
+		}
+	}
+}
 
 //ªªªªªªªªªª

@@ -1,7 +1,7 @@
 //You Oyadomari
 //Kokusai Denshi business Vocational School
 //Initial 2017/1/19
-//LastUpdate 2017/1/31
+//LastUpdate 2017/2/2
 
 #pragma once
 #define WIN32_LEAN_AND_MEAN
@@ -299,7 +299,7 @@ public:
 	//Left motor is low frequency
 	//speed : 0 is off, 65536 is full use
 	//sec : vibration time
-	void setGamepadVibrateLeft(UINT n, WORD speed, float sec)
+	void gamepadVibrateLeft(UINT n, WORD speed, float sec)
 	{
 		if(n > MAX_CONTROLLERS - 1) n = MAX_CONTROLLERS - 1;
 		controllers[n].vibration.wLeftMotorSpeed = speed;
@@ -310,14 +310,17 @@ public:
 	//Right motor is high frequency
 	//speed : 0 is off, 65536 is full use
 	//sec : vibration time
-	void setGamepadVibrateRight(UINT n, WORD speed, float sec)
+	void gamepadVibrateRight(UINT n, WORD speed, float sec)
 	{
 		if(n > MAX_CONTROLLERS - 1) n = MAX_CONTROLLERS - 1;
 		controllers[n].vibration.wRightMotorSpeed = speed;
 		controllers[n].vibrationTimeRight = sec;
 	}
 
-	//Vibrate conected controllers
+	//Process vibration of all controllers
+	//This function is added in the Game::run function to be called automatically in the game loop
+	//frameTime : delta time to contorl vibration time
+	//If vibration time is negative value, motor's speed and vibration time are substituted 0
 	void vibrateControllers(float frameTime);
 
 	//ªªªªªªªªªª

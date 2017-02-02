@@ -69,5 +69,33 @@ public:
 	//Before run	: d3dpp was initialized
 	//After run	: If discoverd proper format and set it to pMode, return true, else return false
 	bool isAdapterCompatible();
+
+	//Check device was lost
+	//Call TestCooperatativeLevel function
+	//If return D3D_OK, device run normally, else
+	//D3DERR_DEVICELOST : device was lost, and can not restore now
+	//D3DERR_DEVICENOTRESET : can reset device
+	//D3DERR_DRIVERINTERNALERROR : device send message of internal error, and there is nothing other than to report error to user
+	//It is necessary that reinitialize D3D presentation paramerer to reset graphic device
+	//This function need calling before run reset function
+	HRESULT getDeviceState();
+
+	//If Direcr3D graphics device was lost, DirectX window contents can not draw
+	//Direct3D device was disabled rendering state, somtimes it was lost from program
+	//If Devoce was lost, must reset device, and recreate resource
+	//FLOW
+	//If device is disabled
+	//		If device was lost and can not reset
+	//			Wait still device is restore
+	//		If device was lost and can reset
+	//			Try to reset Device
+	//			If reset fail
+	//				return
+	//reset function is only method to recall lost device
+	//If all resources that are assigned by D3DPOOL_DEFAULT are not released, reset function fail 
+	//Resetting graphics device needs to call this function after reinitialize D3D presentation parameter
+	HRESULT reset();
+
+
 };
 
