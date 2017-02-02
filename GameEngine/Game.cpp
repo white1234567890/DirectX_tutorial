@@ -1,7 +1,8 @@
 //You Oyadomari
 //Kokusai Denshi business Vocational School
 //Initial 2017/1/19
-//LastUpdate 2017/2/2
+//LastUpdate 2017/2/3
+
 
 #include "Game.h"
 
