@@ -64,6 +64,7 @@ public:
 	virtual void initialize(HWND hwnd);
 
 	//run is recurring in WinMain message loop
+
 	virtual void run(HWND);
 
 	//When graphic device vanished, call this function

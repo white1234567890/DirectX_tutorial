@@ -3,7 +3,6 @@
 //Initial 2017/1/19
 //LastUpdate 2017/2/3
 
-
 #include "Game.h"
 
 Game::Game(void)
@@ -185,4 +184,23 @@ void Game::handleLostGraphicsDevice()
 		//Other devices error
 		else return;	
 	}
+}
+
+//Render game items
+void Game::renderGame()
+{
+	//Start rendering
+	if(SUCCEEDED(graphics->beginScene()))
+	{
+		//render() is pure virtual function that need to override in inherited class
+		//Call render() in inherited class 
+		render();
+
+		//Finish rendering
+		graphics->endScene();
+	}
+
+	handleLostGraphicsDevice();
+	//Draw back buffer on window
+	graphics->showBackbuffer();
 }

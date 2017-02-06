@@ -151,7 +151,7 @@ HRESULT Graphics::showBackbuffer()
 
 	//"This function move next version"
 	//Clear back buffer to rime green
-	device3d->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0,255,0), 0.0f, 0);
+	//device3d->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0,255,0), 0.0f, 0);
 
 	//Draw back buffer on display
 	result = device3d->Present(NULL, NULL, NULL, NULL);

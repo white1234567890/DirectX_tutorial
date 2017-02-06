@@ -32,11 +32,12 @@ private:
 	D3DDISPLAYMODE pMode;
 
 	//Variavles
-	HRESULT result;	//Windows default return code
+	HRESULT result;				//Windows default return code
 	HWND hwnd;
 	bool fullscreen;
 	int width;
 	int height;
+	COLOR_ARGB backColor;	//Background color
 
 	//Use in engine only. Nothing user use function
 	
@@ -96,6 +97,35 @@ public:
 	//Resetting graphics device needs to call this function after reinitialize D3D presentation parameter
 	HRESULT reset();
 
+	//DirectX has some graphic figures renderable
+	//These figures are called primitive
+	//Drawing primitive figures is called rendering
+	//First step of rendering DirectX's primitive is calling BeginScene function of DirectX
+	//After finish all rendering, exit scene calling EndScene function
+	//Out of scene primitive rendering will fail
+	//This function clear all back buffer, and call BeginScene function of DirectX
+	HRESULT beginScene()
+	{
+		result = E_FAIL;	//Default is fail
 
+		//Device is not, return fail
+		if(device3d == NULL) return result;
+
+		//Clear back buffer by backColor
+		device3d->Clear(0, NULL, D3DCLEAR_TARGET, backColor, 1.0F, 0);
+
+		//Start scene to render
+		result = device3d->BeginScene();
+		return result;
+	}
+
+	//Call EndScene function of DirectX
+	HRESULT endScene()
+	{
+		result = E_FAIL;	//Default is fail
+
+		if(device3d) result = device3d->EndScene();
+		return result;
+	}
 };
 
