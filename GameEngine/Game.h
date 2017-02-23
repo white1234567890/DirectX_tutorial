@@ -58,13 +58,31 @@ public:
 	//lParam : store mouse data
 	LRESULT messageHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-	//Initialize game
+	//Create Graphics object, and initialize graphics
+	//Then, call initialize() frome input object, prepare mouse input
+	//Last, prepare high-definition mouse to control speed of game items
+	//QuaryPerformanveFrequency(&timerFreq) store high-definition timer's frequency to timerFreq
+	//QuaryPerformanceCounter(&timeStart) store high-definition timer's count now to timeStart
+	//Initialize game 
 	//Before run : hwnd is handle to window
-	//
 	virtual void initialize(HWND hwnd);
 
-	//run is recurring in WinMain message loop
-
+	//This function call QueryPerfoemanceCounter(&timeEnd) after check an effective graphics pointer
+	//It store now count from high-definition performance counter to timeEnd
+	
+	//Calculate time between instance when timer is called and start counting
+	//Calculation details	
+	//			frameTime = (timeEnd - timeStart) / timerFreq
+	//This value is elapsed time that is Extremelu accurate measured time between instance when gameloop is called and start game loop
+	//Elapsed time value is saved in frameTime
+	//frameTime is used to control animation speed
+	//This code reads high-definition performance timer per game loop
+	//So, frameTime is the elapsed time between the previous game loop and current game loop
+	//There is another parttern that frameTime is defined time to render 1 frame
+	//This value is obtained by substructing end of game loop from start of game loop
+	//This method is not considered time to use Windows OS or other applications caluculating
+	//So, this value is hard to say, accurate
+	//This function is recurring in WinMain message loop
 	virtual void run(HWND);
 
 	//When graphic device vanished, call this function
@@ -77,6 +95,12 @@ public:
 	//Release all memories
 	virtual void deleteAll();
 
+	//Call render() function defining in inherited class from start graphics scene
+	//render() function is pure virtual function, so need to rewritten in inherited class
+	//render() function is actually drawing game graphics
+	//After call render() function, quit graphics scene
+	//Then, test graphics device was lost, and do appropriate process
+	//Last, display back buffer 
 	//Render game item
 	virtual void renderGame();
 

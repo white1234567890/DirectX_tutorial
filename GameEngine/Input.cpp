@@ -248,6 +248,21 @@ void Input::clear(UCHAR what)
 	}
 }
 
+//////////////////////////////////////////////////////////////////////////////
+//Check for connected controllers
+//////////////////////////////////////////////////////////////////////////////
+void Input::checkControllers()
+{
+	DWORD result;
+	for(DWORD i = 0; i < MAX_CONTROLLERS; i++)
+	{
+		result = XInputGetState(i, &controllers[i].state);
+		if(result == ERROR_SUCCESS) controllers[i].connected = true;
+		else controllers[i].connected = false;
+	}
+}
+
+
 //Read connected controllers state
 void Input::readControllers()
 {

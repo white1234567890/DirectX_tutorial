@@ -65,7 +65,7 @@ typedef struct ControllerState
 //««««««««««
 
 //20% in area is default dead zone
-const DWORD GAMEPAD_THUMBSTICK_DEADZONE = 0.20f * float(0X7FFFF);
+const DWORD GAMEPAD_THUMBSTICK_DEADZONE = (DWORD)(0.20f * float(0X7FFFF));
 
 //Trigger area is 0~255
 const DWORD GAMEPAD_TRIGGER_DEADZONE = 30;

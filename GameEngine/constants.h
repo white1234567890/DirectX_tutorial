@@ -2,7 +2,7 @@
 //Author You Oyadomari
 //Kokusai Denshi Business Vocational School
 //Initial 2017/1/11
-//Last update 2017/1/11
+//Last update 2017/2/16
 
 #include <Windows.h>
 
@@ -13,7 +13,7 @@
 //Constant
 //Window
 const char CLASS_NAME[] = "SpaceWar";
-const char APP_TITLE[] = "Game Engine Part 1";
+const char GAME_TITLE[] = "Game Engine Part 1";
 const bool FULLSCREEN = false;	//Default is Window , or set fullscreen
 static int GAME_WIDTH = 640;		//Game width(pixel)
 static int GAME_HEIGHT = 480;		//Game height(pixel)
@@ -37,3 +37,9 @@ const UCHAR SHIP2_FORWARD_KEY = VK_UP;	//Up arrow key
 const UCHAR SHIP2_FIRE_KEY = VK_DOWN;		//Down arrow key
 
 //ªªªªªªªªªª
+
+//Game
+const float FRAME_RATE = 200.0f;									//The target frame rate
+const float MIN_FRAME_RATE = 10.0f;								//The minimum frame rate
+const float MIN_FRAME_TIME = 1.0f / FRAME_RATE;			//Minimum desired time for 1 frame
+const float MAX_FRAME_TIME = 1.0f / MIN_FRAME_RATE;	//Maximum time used in calculations
