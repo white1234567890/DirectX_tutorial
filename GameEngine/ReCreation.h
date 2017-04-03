@@ -1,6 +1,7 @@
 //You Oyadomari
 //Kokusai Denshi Business College
 //Initial 2017/2/17
+
 //LastUpdate 2017/2/17
 #pragma once
 #define WIN32_LEAN_AND_MEAN
@@ -31,4 +32,3 @@ public:
 	void resetAll();
 
 };
-

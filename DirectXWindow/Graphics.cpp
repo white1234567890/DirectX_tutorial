@@ -1,7 +1,7 @@
 //Author You Oyadomari
 //Kokusai Denshi Business Vocational School
 //Initial 2017/1/11
-//Last update 2017/2/20
+//Last update 2017/1/11
 
 #include "Graphics.h"
 
@@ -140,14 +140,7 @@ void Graphics::initialize(HWND hw, int w, int h, bool full)
 	result = direct3d->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hwnd, behavior, &d3dpp, &device3d);
 	if(FAILED(result))
 	{
-		throw(GameError(gameErrorNS::FATAL_ERROR, "Error creating Direct3D device"));
-	}
-
-	//Create sprite
-	result = D3DXCreateSprite(device3d, &sprite);
-	if(FAILED(result))
-	{
-		throw(GameError(gameErrorNS::FATAL_ERROR, "Error createing Direct3D sprite"));
+		throw(GameError(gameErrorNS::FATAL_ERROR, "Error creatind Direct3D device"));
 	}
 }
 
@@ -158,7 +151,7 @@ HRESULT Graphics::showBackbuffer()
 
 	//"This function move next version"
 	//Clear back buffer to rime green
-	//device3d->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0,255,0), 0.0f, 0);
+	device3d->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0,255,0), 0.0f, 0);
 
 	//Draw back buffer on display
 	result = device3d->Present(NULL, NULL, NULL, NULL);
@@ -185,32 +178,4 @@ bool Graphics::isAdapterCompatible()
 	return false;
 }
 
-//////////////////////////////////////////////////////////////////////////////
-//Check device was lost
-//////////////////////////////////////////////////////////////////////////////
-HRESULT Graphics::getDeviceState()
-{
-	result = E_FAIL;	//Fail is default, if success, substitute exchange
-
-	//If devise was lost, return fail
-	if(device3d == NULL) return result;
-
-	result = device3d->TestCooperativeLevel();
-	return result;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-//Reset graphics device
-//////////////////////////////////////////////////////////////////////////////
-HRESULT Graphics::reset()
-{
-	result = E_FAIL;	//Fail is default, if success, substitute exchange
-	
-	//Initialize D3D presentation parameter
-	initD3Dpp();
-
-	//Try to reset graphics device
-	result = device3d->Reset(&d3dpp);
-	return result;
-}
 //ªªªªªªªªªª

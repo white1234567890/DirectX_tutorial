@@ -1,7 +1,7 @@
-////Author You Oyadomari
-////Kokusai Denshi Business Vocational School
-////Initial 2017/1/11
-////Last update 2017/2/2
+//Author You Oyadomari
+//Kokusai Denshi Business Vocational School
+//Initial 2017/1/11
+//Last update 2017/1/11
 
 #define WIN32_LEAN_AND_MEAN
 #define SHIFTED 0x8000
@@ -13,7 +13,8 @@
 #include <crtdbg.h>
 //ªªªªªªªªªª
 
-#include "ReCreation.h"
+#include "Common.h"
+#include "Graphics.h"
 
 //Prototype function
 int WINAPI WinMain(HINSTANCE , HINSTANCE , LPSTR , int);
@@ -21,9 +22,14 @@ bool CreateMainWindow(HWND &, HINSTANCE , int);
 LRESULT WINAPI WinProc(HWND , UINT , WPARAM , LPARAM);
 bool AnotherInstance();
 
-
-ReCreation *game = NULL;	//Game Pointer
-HWND hwnd = NULL;
+//Groval variable
+HINSTANCE hinst;
+HDC hdc;							//Handle to device context
+TCHAR ch = ' ';					//Input charactor
+RECT rect;						//Struct Rectangle
+PAINTSTRUCT ps;				//Is used in WM_PAINT
+bool vkKeys[255];			//Key state
+Graphics *graphics;		//Graphics pointer
 
 //Start windows apprication
 int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,LPSTR lpCmdLine, int nCmdShow )
@@ -36,21 +42,24 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,LPSTR lpCmdLine
 	if(AnotherInstance()) PostQuitMessage(0);
 
 	MSG msg;
-
-	//Create the game and sets up message handler
-	game = new ReCreation;
+	HWND hwnd = NULL;
 
 	//Create window
 	if(!CreateMainWindow(hwnd, hInstance , nCmdShow)) return 1;
 
 	try
 	{
-		game->initialize(hwnd);	//Throw GameError
+	//Create Graphics object
+	graphics = new Graphics;
+	//Initialize Graphics, and throw GameError
+	graphics->initialize(hwnd, GAME_WIDTH, GAME_HEIGHT, FULLSCREEN);
+
 
 	//Main loop
 	int done = 0;
 
-	//Main message loop
+	//Initialize Direct3D
+
 	while(!done)
 	{
 		//Check PeelMessage , WindowMessage
@@ -65,39 +74,169 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,LPSTR lpCmdLine
 		}
 		else
 		{
-			game->run(hwnd);
+			//If not window message, flip display
+			graphics->showBackbuffer();
 		}
 	}
 
 	//Release memory before finishong loop
-	SAFE_DELETE(game);
+	SAFE_DELETE(graphics);
+
 	return msg.wParam;
 	}
 
 	catch(const GameError &err)
 	{
-		game->deleteAll();
-		DestroyWindow(hwnd);
 		MessageBox(NULL, err.getMessage(), "Error", MB_OK);
 	}
 
 	catch(...)
 	{
-		game->deleteAll();
-		DestroyWindow(hwnd);
 		MessageBox(NULL, "Unknown error occurred in game", "Error", MB_OK);
 	}
 
 	//Release memory before force shut down
-	SAFE_DELETE(game);
+	SAFE_DELETE(graphics);
 
 	return 0;
 }
 
 //Window event callback function
-LRESULT WINAPI WinProc(HWND hwnd , UINT msg , WPARAM wParam , LPARAM lParam)
+LRESULT WINAPI WinProc(HWND hWnd , UINT msg , WPARAM wParam , LPARAM lParam)
 {
-	return (game->messageHandler(hwnd, msg, wParam,lParam));
+	int nVirtkey; //Virtual key code
+
+	switch(msg)
+	{
+	case WM_DESTROY:
+		//Send message to quit this program
+		
+		PostQuitMessage(0);
+		return 0;
+
+		//If input charactor from keyboard 
+	case WM_CHAR:
+		switch (wParam)//charactor is wParam
+		{
+		//case 0x08:	//BackSpace
+		//case 0x09:	//Tab
+		//case 0x0A:	//Linefeed
+		//case 0x0D:	//CaridgeRetrun
+		//case 0x1B:	//Escape
+
+		//	//Beep, dont draw
+		//	MessageBeep((UINT) -1);
+		//	return 0;
+
+		//	//Expressable Charctor
+		//default:
+		//	ch = (TCHAR)wParam; //Get charactor
+
+		case ESC_KEY: //Pressed Esc key
+			//Message to Windows exit this program
+			PostQuitMessage(0);
+			return 0;
+
+			//Force WM_PAINT
+			InvalidateRect(hWnd, NULL, TRUE);
+			return 0;
+		}
+
+		//When necessary to redraw window
+		//Get handle to device context
+	case WM_PAINT:
+		hdc = BeginPaint(hWnd, &ps);
+		//Get window size
+		GetClientRect(hWnd , &rect);
+
+		//Draw charactor in center of window
+		TextOut(hdc, rect.right/2, rect.bottom/2, &ch, 1);
+		EndPaint(hWnd, &ps);
+
+		return 0;
+
+		//If press key
+	case WM_KEYDOWN:
+		vkKeys[wParam] = true;
+		switch(wParam)
+		{
+			//Shift key
+		case VK_SHIFT:
+			//Get left Shift key state
+			nVirtkey = GetKeyState(VK_LSHIFT);
+			//If left shift key is pressed
+			if(nVirtkey & SHIFTED) vkKeys[VK_LSHIFT] = true;
+
+			//Get right Shift key state
+			nVirtkey = GetKeyState(VK_RSHIFT);
+			//If right shift key is pressed
+			if(nVirtkey & SHIFTED) vkKeys[VK_RSHIFT] = true;
+
+			break;
+
+			//Ctrl key
+		case VK_CONTROL:
+			//Get left Ctrl key state
+			nVirtkey = GetKeyState(VK_LCONTROL);
+			//If left Ctrl key is pressed
+			if(nVirtkey & SHIFTED) vkKeys[VK_LCONTROL] = true;
+
+			//Get right Ctrl key state
+			nVirtkey = GetKeyState(VK_RCONTROL);
+			//If right Ctrl key is pressed
+			if(nVirtkey & SHIFTED) vkKeys[VK_RCONTROL] = true;
+
+			break;
+		}
+
+		//Force WM_PAINT
+		InvalidateRect(hWnd, NULL, TRUE);
+
+		return 0;
+		break;
+
+		//If release key
+	case WM_KEYUP:
+		vkKeys[wParam] = false;
+		switch (wParam)
+		{
+			//Shift key
+		case VK_SHIFT:
+			//Get left Shift key state
+			nVirtkey = GetKeyState(VK_LSHIFT);
+			//If left shift key is released
+			if((nVirtkey & SHIFTED) == 0) vkKeys[VK_LSHIFT] = false;
+
+			//Get right Shift key state
+			nVirtkey = GetKeyState(VK_RSHIFT);
+			//If right shift key is released
+			if((nVirtkey & SHIFTED) == 0) vkKeys[VK_RSHIFT] = false;
+
+			break;
+
+			//Ctrl key
+		case VK_CONTROL:
+			//Get left Ctrl key state
+			nVirtkey = GetKeyState(VK_LCONTROL);
+			//If left Ctrl key is released
+			if((nVirtkey & SHIFTED) == 0) vkKeys[VK_LCONTROL] = false;
+
+			//Get right Ctrl key state
+			nVirtkey = GetKeyState(VK_RCONTROL);
+			//If right Ctrl key is released
+			if((nVirtkey & SHIFTED) == 0) vkKeys[VK_RCONTROL] = false;
+
+			break;
+		}
+
+		//Force WM_PAINT
+		InvalidateRect(hWnd, NULL, TRUE);
+		return 0;
+		break;
+
+	default:
+		return DefWindowProc(hWnd, msg, wParam, lParam);
+	}
 }
 
 //If error return : false
@@ -137,12 +276,12 @@ bool CreateMainWindow(HWND &hwnd, HINSTANCE hInstance , int nCmdShow)
 	//Create window
 	hwnd = CreateWindow(
 		CLASS_NAME,				//Window class name
-		GAME_TITLE,					//Title ber
-		style,						//Window style
+		APP_TITLE,					//Title ber
+		WS_OVERLAPPEDWINDOW,	//Window style
 		CW_USEDEFAULT,			//Default of window horizontal location
 		CW_USEDEFAULT,			//Default of window vertical locaiton
 		GAME_WIDTH,				//Window horizontal size
-		GAME_HEIGHT,				//Window vertical size
+		GAME_HEIGHT,			//Window vertical size
 		(HWND)NULL,				//Nothing parent window
 		(HMENU)NULL,				//Nothing menu
 		hInstance,					//Handle to apprication instance
@@ -162,8 +301,8 @@ bool CreateMainWindow(HWND &hwnd, HINSTANCE hInstance , int nCmdShow)
 
 		//Redraw window
 		MoveWindow(hwnd,
-			0,																		//Left
-			0,																		//Top
+			0,													//Left
+			0,													//Top
 			GAME_WIDTH + (GAME_WIDTH - clientRect.right),		//Right
 			GAME_HEIGHT + (GAME_HEIGHT - clientRect.bottom),	//Bottom
 			TRUE);
@@ -171,6 +310,9 @@ bool CreateMainWindow(HWND &hwnd, HINSTANCE hInstance , int nCmdShow)
 
 	//Draw window
 	ShowWindow(hwnd , nCmdShow);
+
+	//Send message WM_PAINT to window procedure
+	UpdateWindow(hwnd);
 
 	return true;
 }
