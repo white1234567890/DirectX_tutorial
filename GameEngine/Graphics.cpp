@@ -1,7 +1,7 @@
 //Author You Oyadomari
 //Kokusai Denshi Business Vocational School
 //Initial 2017/1/11
-//Last update 2017/1/18
+//Last update 2017/2/20
 
 #include "Graphics.h"
 
@@ -140,8 +140,11 @@ void Graphics::initialize(HWND hw, int w, int h, bool full)
 	result = direct3d->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hwnd, behavior, &d3dpp, &device3d);
 	if(FAILED(result))
 	{
-		throw(GameError(gameErrorNS::FATAL_ERROR, "Error creatind Direct3D device"));
+		throw(GameError(gameErrorNS::FATAL_ERROR, "Error creating Direct3D device"));
 	}
+
+	//Create sprite
+	result = 
 }
 
 

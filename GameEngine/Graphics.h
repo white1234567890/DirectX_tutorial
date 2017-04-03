@@ -2,7 +2,7 @@
 //Author You Oyadomari
 //Kokusai Denshi Business Vocational School
 //Initial 2017/1/11
-//Last update 2017/1/18
+//Last update 2017/2/20
 
 #define WIN32_LEAN_AND_MEAN
 #ifdef _DEBUG
@@ -10,12 +10,14 @@
 #endif
 
 #include <d3d9.h>
+#include <d3dx9.h>
 #include "constants.h"
 #include "gameError.h"
 
 //DirectX pointer type
 #define LP_3DDEVICE LPDIRECT3DDEVICE9
 #define LP_3D LPDIRECT3D9
+#define LP_SPRITE LPD3DXSPRITE	//Redefine sprite pointer
 
 //Define color
 #define COLOR_ARGB DWORD
@@ -28,6 +30,7 @@ private:
 	//DirectX pointer
 	LP_3D direct3d;
 	LP_3DDEVICE device3d;
+	LP_SPRITE sprite;	//All sprite ude this pointer
 	D3DPRESENT_PARAMETERS d3dpp;
 	D3DDISPLAYMODE pMode;
 
@@ -103,7 +106,7 @@ public:
 	//First step of rendering DirectX's primitive is calling BeginScene function of DirectX
 	//After finish all rendering, exit scene calling EndScene function
 	//Out of scene primitive rendering will fail
-	//This function clear all back buffer, and call BeginScene function of DirectX
+	//This function clear all back buffer, and call BeginScene() function of DirectX
 	HRESULT beginScene()
 	{
 		result = E_FAIL;	//Default is fail
@@ -119,7 +122,8 @@ public:
 		return result;
 	}
 
-	//Call EndScene function of DirectX
+	//All DirectX's primitives rendering need processing in scene
+	//Call EndScene() function of DirectX
 	HRESULT endScene()
 	{
 		result = E_FAIL;	//Default is fail

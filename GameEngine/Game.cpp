@@ -1,7 +1,7 @@
 //You Oyadomari
 //Kokusai Denshi business Vocational School
 //Initial 2017/1/19
-//LastUpdate 2017/2/3
+//LastUpdate 2017/2/16
 
 #include "Game.h"
 
@@ -186,6 +186,56 @@ void Game::handleLostGraphicsDevice()
 	}
 }
 
+//////////////////////////////////////////////////////////////////////////////
+//Called over and over again in WinMain loop
+//////////////////////////////////////////////////////////////////////////////
+void Game::run(HWND hwnd)
+{
+	//If graphics is not inisialized
+	if(graphics == NULL) return;
+
+	//Calculate elapsed time from last frame and save to frameTime
+	QueryPerformanceCounter(&timeEnd);
+	frameTime = (float)(timeEnd.QuadPart - timeStart.QuadPart) / (float)timerFreq.QuadPart;
+
+	//Power-saving code(need winmm.lib to use)
+	//If frame rate is short than you want
+	if(frameTime < MIN_FRAME_TIME)
+	{
+		sleepTime = (DWORD)((MIN_FRAME_TIME - frameTime) * 1000);
+		timeBeginPeriod(1);	//Request 1 milli second Windows timer
+		Sleep(sleepTime);		//Release CPU while sleepTime
+		timeEndPeriod(1);		//Finish 1 milli second timer resolution
+		return;
+	}
+
+	if(frameTime > 0.0f) fps = (fps * 0.99f) + (0.01f / frameTime); //Average fps
+	//If frame rate is very late
+	if(frameTime > MAX_FRAME_TIME)
+	{
+		frameTime = MAX_FRAME_TIME;	//Limit maximum frameTime
+	}
+
+	timeStart = timeEnd;
+	input->readControllers();
+
+	//update(), ai(), collisions() is pure virtual function
+	//These functions need override in inherited Game class
+	if(!paused)
+	{
+		update();												//Update all game items
+		ai();														//Artificial intelligence
+		collisions();											//Process collisions
+		input->vibrateControllers(frameTime);	//Vibrate controllers
+	}
+
+	renderGame();												//Draw all game items
+
+	//Clear input
+	//Call this function after finish all key check
+	input->clear(inputNS::KEYS_PRESSED);
+}
+
 //Render game items
 void Game::renderGame()
 {
@@ -203,4 +253,29 @@ void Game::renderGame()
 	handleLostGraphicsDevice();
 	//Draw back buffer on window
 	graphics->showBackbuffer();
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//If graphics devices lost, release all video memories to be able to reset graphics devices
+//////////////////////////////////////////////////////////////////////////////
+void Game::releaseAll()
+{
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//Recreate all surfaces and reset all entities
+//////////////////////////////////////////////////////////////////////////////
+void Game::resetAll()
+{
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//Delete all reseved memories
+//////////////////////////////////////////////////////////////////////////////
+void Game::deleteAll()
+{
+	releaseAll();	//Call onLostDevice() for every fraphics items
+	SAFE_DELETE(graphics);
+	SAFE_DELETE(input);
+	initialized = false;
 }
