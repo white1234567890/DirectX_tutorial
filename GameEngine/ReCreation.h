@@ -6,6 +6,8 @@
 #pragma once
 #define WIN32_LEAN_AND_MEAN
 #include "game.h"
+#include "TextureManager.h"
+#include "Image.h"
 
 //////////////////////////////////////////////////////////////////////////////
 //Game entity class
@@ -16,7 +18,11 @@ class ReCreation :
 	public Game
 {
 private:
-	//member variables
+	//game items
+	TextureManager nebulaTexture;	//texture of nebula
+	TextureManager planetTexture;	//texture of planet
+	Image planet;								//image of planet
+	Image nebula;								//image of nebula
 
 public:
 	ReCreation(void);

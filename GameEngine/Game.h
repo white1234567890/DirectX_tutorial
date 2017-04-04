@@ -1,7 +1,7 @@
 //You Oyadomari
 //Kokusai Denshi Business Vocational School
 //Initial 2017/1/19
-//LastUpdate 2017/2/2
+//LastUpdate 2017/4/4
 
 #pragma once
 

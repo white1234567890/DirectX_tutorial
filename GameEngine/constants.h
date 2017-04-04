@@ -8,15 +8,29 @@
 
 #define SAFE_RELEASE(ptr) {if(ptr) {(ptr)->Release(); (ptr) = NULL;}}
 #define SAFE_DELETE(ptr) {if(ptr) {delete (ptr); (ptr) = NULL;}}
+#define TRANSCOLOR SETCOLOR_ARGB(0,255,0,255)	//transparant color (magenta)
 
-
+//////////////////////////////////////////////////////////////////////////////
 //Constant
+//////////////////////////////////////////////////////////////////////////////
+
 //Window
 const char CLASS_NAME[] = "SpaceWar";
 const char GAME_TITLE[] = "Game Engine Part 1";
 const bool FULLSCREEN = false;	//Default is Window , or set fullscreen
 static int GAME_WIDTH = 640;		//Game width(pixel)
 static int GAME_HEIGHT = 480;		//Game height(pixel)
+
+//Game
+const double PI = 3.14159265;
+const float FRAME_RATE = 200.0f;									//The target frame rate
+const float MIN_FRAME_RATE = 10.0f;								//The minimum frame rate
+const float MIN_FRAME_TIME = 1.0f / FRAME_RATE;			//Minimum desired time for 1 frame
+const float MAX_FRAME_TIME = 1.0f / MIN_FRAME_RATE;	//Maximum time used in calculations
+
+//graphic images
+const char NEBULA_IMAGE[] = "textures\\player_01.png";
+const char PLANET_IMAGE[] = "textures\\player_02.png";
 
 //Key mapping
 //This game use simple constant value to key mapping
@@ -38,8 +52,3 @@ const UCHAR SHIP2_FIRE_KEY = VK_DOWN;		//Down arrow key
 
 //Å™Å™Å™Å™Å™Å™Å™Å™Å™Å™
 
-//Game
-const float FRAME_RATE = 200.0f;									//The target frame rate
-const float MIN_FRAME_RATE = 10.0f;								//The minimum frame rate
-const float MIN_FRAME_TIME = 1.0f / FRAME_RATE;			//Minimum desired time for 1 frame
-const float MAX_FRAME_TIME = 1.0f / MIN_FRAME_RATE;	//Maximum time used in calculations

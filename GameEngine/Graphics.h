@@ -18,10 +18,57 @@
 #define LP_3DDEVICE LPDIRECT3DDEVICE9
 #define LP_3D LPDIRECT3D9
 #define LP_SPRITE LPD3DXSPRITE	//Redefine sprite pointer
+#define LP_TEXTURE LPDIRECT3DTEXTURE9	//Redefine texture pointer
 
 //Define color
 #define COLOR_ARGB DWORD
-#define SETCOLOR_ARGB(a,r,g,b) ((COLOR_ARGB)((((a)&0xff) << 24 | (((r)&0xff) << 16 | (((g)&0xff << 8 | ((b)&0xff)))
+#define SETCOLOR_ARGB(a,r,g,b) ((COLOR_ARGB)((((a)&0xff)<<24) | (((r)&0xff)<<16) | (((g)&0xff)<<8) | ((b)&0xff)))
+
+namespace graphicsNS
+{
+	// Some common colors
+    // ARGB numbers range from 0 through 255
+    // A = Alpha channel (transparency where 255 is opaque)
+    // R = Red, G = Green, B = Blue
+    const COLOR_ARGB ORANGE  = D3DCOLOR_ARGB(255,255,165,  0);
+    const COLOR_ARGB BROWN   = D3DCOLOR_ARGB(255,139, 69, 19);
+    const COLOR_ARGB LTGRAY  = D3DCOLOR_ARGB(255,192,192,192);
+    const COLOR_ARGB GRAY    = D3DCOLOR_ARGB(255,128,128,128);
+    const COLOR_ARGB OLIVE   = D3DCOLOR_ARGB(255,128,128,  0);
+    const COLOR_ARGB PURPLE  = D3DCOLOR_ARGB(255,128,  0,128);
+    const COLOR_ARGB MAROON  = D3DCOLOR_ARGB(255,128,  0,  0);
+    const COLOR_ARGB TEAL    = D3DCOLOR_ARGB(255,  0,128,128);
+    const COLOR_ARGB GREEN   = D3DCOLOR_ARGB(255,  0,128,  0);
+    const COLOR_ARGB NAVY    = D3DCOLOR_ARGB(255,  0,  0,128);
+    const COLOR_ARGB WHITE   = D3DCOLOR_ARGB(255,255,255,255);
+    const COLOR_ARGB YELLOW  = D3DCOLOR_ARGB(255,255,255,  0);
+    const COLOR_ARGB MAGENTA = D3DCOLOR_ARGB(255,255,  0,255);
+    const COLOR_ARGB RED     = D3DCOLOR_ARGB(255,255,  0,  0);
+    const COLOR_ARGB CYAN    = D3DCOLOR_ARGB(255,  0,255,255);
+    const COLOR_ARGB LIME    = D3DCOLOR_ARGB(255,  0,255,  0);
+    const COLOR_ARGB BLUE    = D3DCOLOR_ARGB(255,  0,  0,255);
+    const COLOR_ARGB BLACK   = D3DCOLOR_ARGB(255,  0,  0,  0);
+    const COLOR_ARGB FILTER  = D3DCOLOR_ARGB(  0,  0,  0,  0);  // use to specify drawing with colorFilter
+    const COLOR_ARGB ALPHA25 = D3DCOLOR_ARGB( 64,255,255,255);  // AND with color to get 25% alpha
+    const COLOR_ARGB ALPHA50 = D3DCOLOR_ARGB(128,255,255,255);  // AND with color to get 50% alpha
+    const COLOR_ARGB BACK_COLOR = NAVY;                         // background color of game
+
+    enum DISPLAY_MODE{TOGGLE, FULLSCREEN, WINDOW};
+}
+
+//SpraiteData
+struct SpriteData
+{
+	int width;					//width(pixels)
+	int height;				//height(pixels)
+	float x,y;					//Screen location (top left corer of sprite)
+	float scale;				//less then 1 is reduceing, more then 1 is expanding
+	float angle;				//rotation angle (radian)
+	RECT rect;					//used to select an image from a larger texture
+	LP_TEXTURE texture;	//pointer to texture
+	bool flipHorizontal;	//true to flip sprite horizontally
+	bool flipVertical;		//true to flip sprite vertically
+};
 
 //This class is rapper class of DirectX graphics code
 class Graphics
@@ -84,6 +131,16 @@ public:
 	//This function need calling before run reset function
 	HRESULT getDeviceState();
 
+	//Draw SpriteData struct
+	//color : applied as a filter, White is default
+	//Creates a sprite Begin/End pair
+	//Before run : call sprite->Begin()
+	//After run :	call sprite->End()
+	//					spriteData.rect defines the portion of spriteData.texture
+	//					spriteData.rect.right must be right edge + 1
+	//					spriteData.rect.bottom must be bottom edge + 1
+	void drawSprite(const SpriteData &spriteData, COLOR_ARGB color = graphicsNS::WHITE);
+
 	//If Direcr3D graphics device was lost, DirectX window contents can not draw
 	//Direct3D device was disabled rendering state, somtimes it was lost from program
 	//If Devoce was lost, must reset device, and recreate resource
@@ -131,5 +188,25 @@ public:
 		if(device3d) result = device3d->EndScene();
 		return result;
 	}
+
+	//sprite begin
+	void spriteBegin()
+	{
+		sprite->Begin(D3DXSPRITE_ALPHABLEND);
+	}
+	//sprite end
+	void spriteEnd()
+	{
+		sprite->End();
+	}
+
+	//Load texture to defalt D3D memory
+	//this function use in engine only
+	//*filename : name of load file
+	//transcolor : ARGB
+	//&width : width
+	//&height : height
+	//&texture : type of texture
+	HRESULT loadTexture(const char *filename, COLOR_ARGB transcolor, UINT &width, UINT &height, LP_TEXTURE &texture);
 };
 

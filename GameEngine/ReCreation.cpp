@@ -24,6 +24,35 @@ ReCreation::~ReCreation(void)
 void ReCreation::initialize(HWND hwnd)
 {
 	Game::initialize(hwnd);	//Throw game error
+
+	//texture of nebula
+	if(!nebulaTexture.initialize(graphics, NEBULA_IMAGE))
+	{
+		throw(GameError(gameErrorNS::FATAL_ERROR, "Error initializing nebula texture"));
+	}
+	
+	//texture of planet
+	if(!planetTexture.initialize(graphics, PLANET_IMAGE))
+	{
+		throw(GameError(gameErrorNS::FATAL_ERROR, "Error initializeing planet texture"));
+	}
+
+	//nebula
+	if(!nebula.initialize(graphics, 0, 0, 0, &nebulaTexture))
+	{
+		throw(GameError(gameErrorNS::FATAL_ERROR, "Error initializing nebula"));
+	}
+
+	//planet
+	if(!planet.initialize(graphics, 0, 0, 0, &planetTexture))
+	{
+		throw(GameError(gameErrorNS::FATAL_ERROR, "Error initializing planet"));
+	}
+
+	//set planet in center of screen
+	planet.setX(GAME_WIDTH * 0.5f - planet.getWidth() * 0.5f);
+	planet.setY(GAME_HEIGHT * 0.5f - planet.getHeight() * 0.5f);
+
 	return;
 }
 
@@ -53,6 +82,12 @@ void ReCreation::collisions()
 //////////////////////////////////////////////////////////////////////////////
 void ReCreation::render()
 {
+	graphics->spriteBegin();	//begin draw sprite
+
+	nebula.draw();	//add orion in the scene
+	planet.draw();	//add planet int the scene
+
+	graphics->spriteEnd();	//end draw sprite
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -60,6 +95,8 @@ void ReCreation::render()
 //////////////////////////////////////////////////////////////////////////////
 void ReCreation::releaseAll()
 {
+	planetTexture.onLostDevice();
+	nebulaTexture.onLostDevice();
 	Game::releaseAll();
 	return;
 }
@@ -69,6 +106,8 @@ void ReCreation::releaseAll()
 //////////////////////////////////////////////////////////////////////////////
 void ReCreation::resetAll()
 {
+	nebulaTexture.onResetDevice();
+	planetTexture.onResetDevice();
 	Game::resetAll();
 	return;
 }

@@ -200,6 +200,71 @@ HRESULT Graphics::getDeviceState()
 }
 
 //////////////////////////////////////////////////////////////////////////////
+//Draw the sprite described in SpriteData structure
+//Color is optional, it is applied like a filter, WHITE is default (no change)
+//Pre : sprite->Begin() is called
+//Post:	sprite->End() is called
+//			spriteData.rect defines the portion of spriteData.texture to draw
+//			spriteData.rect.right must be right edge + 1
+//			spriteData.rect.bottom must be bottom edge + 1
+//////////////////////////////////////////////////////////////////////////////
+void Graphics::drawSprite(const SpriteData &spriteData, COLOR_ARGB color)
+{
+	//if no texture
+	if(spriteData.texture == NULL) return;
+
+	//find center of sprite
+	D3DXVECTOR2 spriteCenter = D3DXVECTOR2((float)(spriteData.width / 2 * spriteData.scale), (float)(spriteData.height / 2 * spriteData.scale));
+
+	//location of sprite in screen
+	D3DXVECTOR2 translate = D3DXVECTOR2((float)spriteData.x, (float)spriteData.y);
+
+	//scaling vector (x,y)
+	D3DXVECTOR2 scaling(spriteData.scale, spriteData.scale);
+
+	//if flip horizontally
+	if(spriteData.flipHorizontal)
+	{
+		scaling.x *= -1;
+		//get center of flipped texture
+		spriteCenter.x -= float(spriteData.width * spriteData.scale);
+		//flip occurs around left edge,
+		//move right to put sprite in same locasion as original
+		translate.x += (float)(spriteData.width * spriteData.scale);
+
+	}
+
+	//if flip vertically
+	if(spriteData.flipVertical)
+	{
+		scaling.y *= -1;
+		//get center of flipped texture
+		spriteCenter.y -= float(spriteData.height * spriteData.scale);
+		//flip occurs around top edge,
+		//move down to put sprite in same locasion as original
+		translate.y += (float)(spriteData.height * spriteData.scale);
+	}
+
+	//create a martix to rotate, scale and locate sprite
+	D3DXMATRIX matrix;
+	D3DXMatrixTransformation2D(
+		&matrix,							//matrix
+		NULL,									//origin is left top when scale
+		0.0f,									//don't rotate when scale
+		&scaling,							//scale amount
+		&spriteCenter,					//center of rotation
+		(float)(spriteData.angle),	//rotation angle
+		&translate);						//x,y location
+
+	//apply matrix to sprite
+	sprite->SetTransform(&matrix);
+
+	//draw the sprite
+	sprite->Draw(spriteData.texture, &spriteData.rect, NULL, NULL, color);
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
 //Reset graphics device
 //////////////////////////////////////////////////////////////////////////////
 HRESULT Graphics::reset()
@@ -213,4 +278,63 @@ HRESULT Graphics::reset()
 	result = device3d->Reset(&d3dpp);
 	return result;
 }
+//ªªªªªªªªªª
+
+//Public function
+//««««««««««
+
+//////////////////////////////////////////////////////////////////////////////
+//Load texture to defalt D3D memory
+//this function use in engine only
+//use TextureManager class
+//Before run :	filname is texture file name
+//						transcolor is invisible color
+//After run :	width and height = texture size
+//					texture = pointer to texture
+//&height : height
+//&texture : type of texture
+//////////////////////////////////////////////////////////////////////////////
+HRESULT Graphics::loadTexture(const char *filename, COLOR_ARGB transcolor, UINT &width, UINT &height, LP_TEXTURE &texture)
+{
+	//struct to read file data
+	D3DXIMAGE_INFO info;
+	result = E_FAIL;
+	try
+	{
+		if(filename == NULL)
+		{
+			texture = NULL;
+			return D3DERR_INVALIDCALL;
+		}
+
+		//get width and height from file
+		result = D3DXGetImageInfoFromFile(filename, &info);
+		if(result != D3D_OK) return result;
+		width = info.Width;
+		height = info.Height;
+
+		//Load file and create new texture
+		result = D3DXCreateTextureFromFileEx(
+			device3d,				//3D device
+			filename,				//name of texture file
+			info.Width,				//texture width
+			info.Height,			//texture height
+			1,							//Mipmap level (nothing chain)
+			0,							//usage
+			D3DFMT_UNKNOWN,		//surface format(default)
+			D3DPOOL_DEFAULT,	//memory type for texture
+			D3DX_DEFAULT,		//image filter
+			D3DX_DEFAULT,		//Mipmap filter
+			transcolor,			//code key of invisible color
+			&info,					//Bitmap file data
+			NULL,						//color palette
+			&texture);				//texture
+	}catch(...)
+	{
+		throw(GameError(gameErrorNS::FATAL_ERROR, "Error int Graphics::loadTexture"));
+	}
+
+	return result;
+}
+
 //ªªªªªªªªªª
