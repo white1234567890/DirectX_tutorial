@@ -97,7 +97,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,LPSTR lpCmdLine
 //Window event callback function
 LRESULT WINAPI WinProc(HWND hwnd , UINT msg , WPARAM wParam , LPARAM lParam)
 {
-	return (game->messageHandler(hwnd, msg, wParam,lParam));
+	return (game->messageHandler(hwnd, msg, wParam, lParam));
 }
 
 //If error return : false
@@ -183,8 +183,7 @@ bool AnotherInstance()
 	HANDLE ourMutex;
 
 	//Try to create mutex in unique string
-	ourMutex = CreateMutex(NULL, true,
-		"Use_a_different_string_here_for_each_program_48161-XYZZY");
+	ourMutex = CreateMutex(NULL, true,	"Use_a_different_string_here_for_each_program_48161-XYZZY");
 	if(GetLastError() == ERROR_ALREADY_EXISTS)
 	{
 		//Release mutex

@@ -18,11 +18,9 @@ class ReCreation :
 	public Game
 {
 private:
-	//game items
-	TextureManager nebulaTexture;	//texture of nebula
-	TextureManager planetTexture;	//texture of planet
-	Image planet;								//image of planet
-	Image nebula;								//image of nebula
+	//game items	
+	TextureManager playerTexture;	//texture of player
+	Image player;						//image of player
 
 public:
 	ReCreation(void);

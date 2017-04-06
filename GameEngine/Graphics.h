@@ -24,6 +24,9 @@
 #define COLOR_ARGB DWORD
 #define SETCOLOR_ARGB(a,r,g,b) ((COLOR_ARGB)((((a)&0xff)<<24) | (((r)&0xff)<<16) | (((g)&0xff)<<8) | ((b)&0xff)))
 
+//Define vector2
+#define VECTOR2 D3DXVECTOR2
+
 namespace graphicsNS
 {
 	// Some common colors
@@ -208,5 +211,17 @@ public:
 	//&height : height
 	//&texture : type of texture
 	HRESULT loadTexture(const char *filename, COLOR_ARGB transcolor, UINT &width, UINT &height, LP_TEXTURE &texture);
+
+	//return length of vector v
+	static float Vector2Length(const VECTOR2 *v) {return D3DXVec2Length(v);}
+
+	//return Dot product of v1 and v2
+	static float Vector2Dot(const VECTOR2 *v1, const VECTOR2 *v2) {return D3DXVec2Dot(v1, v2);}
+
+	//normalize vector v
+	static void Vector2Normalize(VECTOR2 *v) {D3DXVec2Normalize(v, v);}
+
+	//transform vector v with matrix m
+	static VECTOR2* Vector2Transform(VECTOR2* v, D3DXMATRIX *m) {return D3DXVec2TransformCoord(v, v, m);}
 };
 

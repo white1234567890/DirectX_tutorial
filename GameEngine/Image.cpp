@@ -183,6 +183,8 @@ void Image::update(float frameTime)
 
 //////////////////////////////////////////////////////////////////////////////
 //set the current frame of the image
+//use when change animation sequence or select a texture from image that have some texrures
+//c:	set current frame
 //////////////////////////////////////////////////////////////////////////////
 void Image::setCurrentFrame(int c)
 {
@@ -200,6 +202,8 @@ void Image::setCurrentFrame(int c)
 inline void Image::setRect()
 {
 	//configure spriteData.rect to draw currentFrame
+	//Set rect a part of texture using currentFrame
+	//and draw image in the rect
 	spriteData.rect.left = (currentFrame % cols) * spriteData.width;
 	//right edge + 1
 	spriteData.rect.right = spriteData.rect.left + spriteData.width;
