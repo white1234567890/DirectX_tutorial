@@ -331,6 +331,39 @@ bool Entity::collideCornerCircle(VECTOR2 corner, Entity &ent, VECTOR2 &collision
 }
 
 //////////////////////////////////////////////////////////////////////////////
+//pixel perfect collision detection method
+//called by collision()
+//if the graphics card does not support stencil buffer 
+//then CIRCLE collision is used
+//post:	return true if collisoin, false otherwise
+//			set collisionVector if collision
+//////////////////////////////////////////////////////////////////////////////
+bool Entity::collidePixelPerfect(Entity &ent, VECTOR2 collisionVector)
+{
+	//if stencil not supported
+	if(graphics->getStencilSupport() == false)	
+	{
+		return (collideCircle(ent, collisionVector));	//use CIRCLE collision
+	}
+
+	//get fresh texture because they may have been released
+	ent.spriteData.texture = ent.textureManager->getTexture();
+	spriteData.texture = textureManager->getTexture();
+
+	//if pixel are colliding
+	pixelColliding = graphics->pixelCollision(ent.getSpriteInfo(), this->getSpriteInfo());
+	if(pixelColliding > 0)
+	{
+		//set collision vector to center of entity
+		collisionVector = *ent.getCenter() - *getCenter();
+		collisionCenter = *getCenter();
+		ent.setCollisionCenter(*ent.getCenter());
+		return true;
+	}
+	return false;
+}
+
+//////////////////////////////////////////////////////////////////////////////
 //Update entity
 //typically called once per frame
 //frameTime:	used to regulate the speed of move
@@ -447,3 +480,31 @@ void Entity::damage(int weapon)
 {
 }
 
+//////////////////////////////////////////////////////////////////////////////
+//if collide other entity, then bound
+//////////////////////////////////////////////////////////////////////////////
+void Entity::bounce(VECTOR2 &collisionVector, Entity &ent)
+{
+	VECTOR2 Vdiff = ent.getVelocity() - velocity;	//relational velocity
+	VECTOR2 cUV = collisionVector;	//collision unit vector
+	Graphics::Vector2Normalize(&cUV);
+	float cUVdotVdiff = Graphics::Vector2Dot(&cUV, &Vdiff);	//length of reaction vector
+	float massRatio = 2.0f;
+	if(getMass() != 0)
+	{
+		//calculate mass ratio
+		massRatio *= (ent.getMass() / (getMass() + ent.getMass()));
+	}
+
+	//if entity already move to reflected direction, bouns must huve been previously called and they are still colliding
+	//moce entities apart along collisionVector
+	if(cUVdotVdiff > 0)
+	{
+		setX(getX() - cUV.x * massRatio);
+		setY(getY() - cUV.y * massRatio);
+	}
+	else
+	{
+		deltaV += ((massRatio * cUVdotVdiff) * cUV);
+	}
+}

@@ -59,3 +59,6 @@ const UCHAR PLAYER_LOW_SPEED_KEY = VK_RSHIFT;	//right shift key
 const UCHAR PLAYER_HIGH_SPEED_KEY = VK_SPACE;	//space key
 
 //ªªªªªªªªªª
+
+//weapon types
+enum WEAPON {TORPEDO, SHIP, PLANET};

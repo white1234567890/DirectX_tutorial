@@ -75,6 +75,17 @@ void Graphics::initD3Dpp()
 //««««««««««
 
 //////////////////////////////////////////////////////////////////////////////
+//test for lost device
+//////////////////////////////////////////////////////////////////////////////
+HRESULT Graphics::getDeviceState()
+{
+	result = E_FAIL;	//default to fail, replace on success
+	if(device3d == NULL) return result;
+	result = device3d->TestCooperativeLevel();
+	return result;
+}
+
+//////////////////////////////////////////////////////////////////////////////
 //Release all	
 //////////////////////////////////////////////////////////////////////////////
 void Graphics::releaseAll()
@@ -183,20 +194,6 @@ bool Graphics::isAdapterCompatible()
 	}
 
 	return false;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-//Check device was lost
-//////////////////////////////////////////////////////////////////////////////
-HRESULT Graphics::getDeviceState()
-{
-	result = E_FAIL;	//Fail is default, if success, substitute exchange
-
-	//If devise was lost, return fail
-	if(device3d == NULL) return result;
-
-	result = device3d->TestCooperativeLevel();
-	return result;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -336,5 +333,62 @@ HRESULT Graphics::loadTexture(const char *filename, COLOR_ARGB transcolor, UINT 
 
 	return result;
 }
+
+//////////////////////////////////////////////////////////////////////////////
+//return the number of pixels colliding between the two sprites
+//pre:	the device support a stencil buffer and pOcclusionQuery points to a valid occlusionQuery object
+//post:	returns the number of pixels of overlap
+//////////////////////////////////////////////////////////////////////////////
+DWORD Graphics::pixelCollision(const SpriteData &sprite1,	const SpriteData &sprite2)
+{
+	//if no stencil buffer support
+	if(!stencilSupport) return 0;
+
+	beginScene();
+
+	//set up stencil bufffer using current entity
+	device3d->SetRenderState(D3DRS_STENCILENABLE, true);
+	device3d->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_ALWAYS);
+	device3d->SetRenderState(D3DRS_STENCILREF, 0x1);
+	device3d->SetRenderState(D3DRS_STENCILMASK, 0xffffffff);
+	device3d->SetRenderState(D3DRS_STENCILWRITEMASK, 0xffffffff);
+	device3d->SetRenderState(D3DRS_STENCILFAIL, D3DSTENCILOP_KEEP);
+	device3d->SetRenderState(D3DRS_STENCILPASS, D3DSTENCILOP_REPLACE);
+	
+	//write a 1 into the stencil buffer for each non-transparent pixel in ent
+	spriteBegin();
+	//enable stencil buffer (must be after spriteBegin)
+	device3d->SetRenderState(D3DRS_STENCILENABLE, true);
+	drawSprite(sprite2);
+	spriteEnd();
+
+	//change stencil buffer to only allow writes where the stencil velue is 1
+	//(where the ent sprite is colliding with the current sprite)
+	device3d->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_EQUAL);
+	device3d->SetRenderState(D3DRS_STENCILPASS, D3DSTENCILOP_KEEP);
+
+	//begin occlusion query to count pixels that are drawn
+	pOcclusionQuery->Issue(D3DISSUE_BEGIN);
+
+	spriteBegin();
+	
+	//enable stencil buffer (must be after spriteBegin)
+	device3d->SetRenderState(D3DRS_STENCILENABLE, true);
+	drawSprite(sprite1);	//draw current entity
+	spriteEnd();
+
+	//end occlusion query
+	pOcclusionQuery->Issue(D3DISSUE_END);
+
+	//wait until the gpu is finished
+	while(S_FALSE == pOcclusionQuery->GetData(&numberOfPixelsColliding, sizeof(DWORD), D3DGETDATA_FLUSH)){}
+
+	//turn off stencil
+	device3d->SetRenderState(D3DRS_STENCILENABLE, false);
+
+	endScene();
+	return numberOfPixelsColliding;
+}
+
 
 //ªªªªªªªªªª

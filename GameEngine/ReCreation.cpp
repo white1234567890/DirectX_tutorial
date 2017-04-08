@@ -32,7 +32,7 @@ void ReCreation::initialize(HWND hwnd)
 	}
 
 	//player image
-	if(!player.initialize(graphics, PLAYER_WIDTH, PLAYER_HEIGHT, PLAYER_COL, &playerTexture))
+	if(!player.initialize(this, PLAYER_WIDTH, PLAYER_HEIGHT, PLAYER_COL, &playerTexture))
 	{
 		throw(GameError(gameErrorNS::FATAL_ERROR, "Error initializing player"));
 	}
@@ -114,6 +114,35 @@ void ReCreation::ai()
 //////////////////////////////////////////////////////////////////////////////
 void ReCreation::collisions()
 {
+	VECTOR2 collisionsVector;
+	
+	//if player collide planet
+	if(player.collidesWith(planet, collisionsVector))
+	{
+		//bound planet
+		player.bounce(collisionsVector, planet);
+		player.damage(PLANET);
+	}
+
+	//if player1 collide planet
+	if(player1.collidesWith(planet, collisionsVector))
+	{
+		//bound planet
+		player1.bounce(collisionsVector, planet);
+		player1.damage(PLANET);
+	}
+
+	//if collide players
+	if(player.collidesWith(player1, collisionsVector))
+	{
+		//player bound player1
+		player.bounce(collisionsVector, player1);
+		player.damage(SHIP);
+
+		//player 1 collide player
+		player1.bounce(collisionsVector, player);
+		player1.damage(SHIP);
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////

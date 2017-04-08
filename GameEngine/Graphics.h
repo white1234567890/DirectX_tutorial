@@ -83,11 +83,14 @@ private:
 	LP_SPRITE sprite;	//All sprite ude this pointer
 	D3DPRESENT_PARAMETERS d3dpp;
 	D3DDISPLAYMODE pMode;
+	IDirect3DQuery9* pOcclusionQuery;	//for pixel perfect collision detection
+	DWORD numberOfPixelsColliding;		//for pixel perfect collision detection
 
 	//Variavles
 	HRESULT result;				//Windows default return code
 	HWND hwnd;
 	bool fullscreen;
+	bool stencilSupport;		//true if device supports stencil buffer
 	int width;
 	int height;
 	COLOR_ARGB backColor;	//Background color
@@ -103,6 +106,32 @@ public:
 	
 	//Destructor
 	~Graphics(void);
+
+	//Getter
+	//««««««««««
+
+	//return  direct3d
+	LP_3D get3D() {return direct3d;}
+
+	//return device3d
+	LP_3DDEVICE get3Ddevice() {return device3d;}
+
+	//return sprite
+	LP_SPRITE getSprite() {return sprite;}
+
+	//return handle to device context(window)
+	HDC getDC() {return GetDC(hwnd);}
+
+	//return fullscreen
+	bool getFullscreen() {return fullscreen;}
+
+	//return pOcclusionQuery
+	IDirect3DQuery9* detPOcclusionQuery() {return pOcclusionQuery;}
+
+	//return true if the graphics card supports a stencil buffer
+	bool getStencilSupport() {return stencilSupport;}
+
+	//ªªªªªªªªªª
 
 	//Release direct3d and device3d to use SAFE_RELEASE macro
 	void releaseAll();
@@ -223,5 +252,10 @@ public:
 
 	//transform vector v with matrix m
 	static VECTOR2* Vector2Transform(VECTOR2* v, D3DXMATRIX *m) {return D3DXVec2TransformCoord(v, v, m);}
+
+	//return the number oc pixels colliding between the two sprites
+	//pre:	the device supprots a stencil buffer and pOcclunsionQuery points to a valid occlusionQuery object
+	//post:	return the number of pixels of overlap
+	DWORD pixelCollision(const SpriteData &sprite1,	const SpriteData &sprite2);
 };
 
