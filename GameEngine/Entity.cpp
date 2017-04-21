@@ -363,6 +363,8 @@ bool Entity::collidePixelPerfect(Entity &ent, VECTOR2 collisionVector)
 	return false;
 }
 
+
+
 //////////////////////////////////////////////////////////////////////////////
 //Update entity
 //typically called once per frame
@@ -507,4 +509,22 @@ void Entity::bounce(VECTOR2 &collisionVector, Entity &ent)
 	{
 		deltaV += ((massRatio * cUVdotVdiff) * cUV);
 	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//gravity to this entity from other entity
+//add gravity velocity of this entity
+//Force = GRAVITY * m1 * m2 / r^2
+//r^2 = (Ax - Bx)^2 + (Ay - By)^2
+//////////////////////////////////////////////////////////////////////////////
+void Entity::gravityForce(Entity *ent, float frameTime)
+{
+	//if either entity is not active, do not effect gravity
+	if(!activate || !ent->getActive())
+		return ;
+
+	rr = pow((ent->getCenterX() - getCenterX()), 2) +
+		pow((ent->getCenterY() - getCenterY()), 2);
+
+	force = gravity * ent->getMass() * mass / rr;
 }

@@ -34,6 +34,8 @@ void Player::update(float frameTime)
 	spriteData.x += frameTime * velocity.x;	//move player to X axis
 	spriteData.y += frameTime * velocity.y;	//move player to Y axis
 
+	velocity.y = frameTime * GRAVITY;	//drap down follow gravity
+
 	//bound on wall
 	//if collide on right edge
 	if(spriteData.x > GAME_WIDTH - playerNS::WIDTH * getScale())
@@ -51,7 +53,7 @@ void Player::update(float frameTime)
 	}
 
 	//if collide on bottom edge
-	if(spriteData.y > GAME_HEIGHT * playerNS::HEIGHT * getScale())
+	if(spriteData.y > GAME_HEIGHT - playerNS::HEIGHT * getScale())
 	{
 		//set bottom edge
 		spriteData.y = GAME_HEIGHT - playerNS::HEIGHT * getScale();

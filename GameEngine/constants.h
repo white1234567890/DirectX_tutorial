@@ -27,6 +27,7 @@ const float FRAME_RATE = 200.0f;									//The target frame rate
 const float MIN_FRAME_RATE = 10.0f;								//The minimum frame rate
 const float MIN_FRAME_TIME = 1.0f / FRAME_RATE;			//Minimum desired time for 1 frame
 const float MAX_FRAME_TIME = 1.0f / MIN_FRAME_RATE;	//Maximum time used in calculations
+const float GRAVITY = 2000.0f;										//gravity accelaration (pixel per 1 second)
 
 //graphics images
 const char PLAYER_IMAGE[] = "textures\\player.png";	//picture of player

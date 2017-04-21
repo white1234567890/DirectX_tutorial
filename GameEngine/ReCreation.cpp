@@ -46,6 +46,7 @@ void ReCreation::initialize(HWND hwnd)
 	player.setCurrentFrame(PLAYER_START_FRAME);	//set start frame to current frame
 	player.setFrameDelay(PLAYER_ANIMATION_DELAY);	//set player animation delay
 	player.setDegree(45.0f);	//player angle;
+	player.setVelocity(VECTOR2(playerNS::SPEED, -playerNS::SPEED));	//velocity
 
 	return;
 }
@@ -55,49 +56,49 @@ void ReCreation::initialize(HWND hwnd)
 //////////////////////////////////////////////////////////////////////////////
 void ReCreation::update()
 {
-	//move right
-	if(input->isKeyDown(PLAYER_RIGHT_KEY))
-	{
-		player.setX(player.getX() + frameTime * PLAYER_SPEED);
-		if(player.getX() > GAME_WIDTH - player.getWidth()) //if over right edge
-		{
-			//set location on right edge
-			player.setX((float)(GAME_WIDTH - player.getWidth()));
-		}
-	}
+	////move right
+	//if(input->isKeyDown(PLAYER_RIGHT_KEY))
+	//{
+	//	player.setX(player.getX() + frameTime * PLAYER_SPEED);
+	//	if(player.getX() > GAME_WIDTH - player.getWidth()) //if over right edge
+	//	{
+	//		//set location on right edge
+	//		player.setX((float)(GAME_WIDTH - player.getWidth()));
+	//	}
+	//}
 
-	//move left
-	if(input->isKeyDown(PLAYER_LEFT_KEY))
-	{
-		player.setX(player.getX() - frameTime * PLAYER_SPEED);
-		if(player.getX() < player.getWidth())	//if over left edge
-		{
-			//set location on left edge
-			player.setX((float)player.getWidth());
-		}
-	}
+	////move left
+	//if(input->isKeyDown(PLAYER_LEFT_KEY))
+	//{
+	//	player.setX(player.getX() - frameTime * PLAYER_SPEED);
+	//	if(player.getX() < player.getWidth())	//if over left edge
+	//	{
+	//		//set location on left edge
+	//		player.setX((float)player.getWidth());
+	//	}
+	//}
 
-	//move up
-	if(input->isKeyDown(PLAYER_UP_KEY))
-	{
-		player.setY(player.getY() - frameTime * PLAYER_SPEED);
-		if(player.getY() < player.getHeight())	//if over top edge
-		{
-			//set location on top edge
-			player.setY((float)player.getHeight());
-		}
-	}
+	////move up
+	//if(input->isKeyDown(PLAYER_UP_KEY))
+	//{
+	//	player.setY(player.getY() - frameTime * PLAYER_SPEED);
+	//	if(player.getY() < player.getHeight())	//if over top edge
+	//	{
+	//		//set location on top edge
+	//		player.setY((float)player.getHeight());
+	//	}
+	//}
 
-	//move down
-	if(input->isKeyDown(PLAYER_DOWN_KEY))
-	{
-		player.setY(player.getY() + frameTime * PLAYER_SPEED);
-		if(player.getY() > GAME_WIDTH - player.getHeight())	//if over bottom edge
-		{
-			//set location on bottom edge
-			player.setY((float)(GAME_WIDTH - player.getHeight()));
-		}
-	}
+	////move down
+	//if(input->isKeyDown(PLAYER_DOWN_KEY))
+	//{
+	//	player.setY(player.getY() + frameTime * PLAYER_SPEED);
+	//	if(player.getY() > GAME_WIDTH - player.getHeight())	//if over bottom edge
+	//	{
+	//		//set location on bottom edge
+	//		player.setY((float)(GAME_WIDTH - player.getHeight()));
+	//	}
+	//}
 
 	player.update(frameTime);
 }
@@ -115,34 +116,6 @@ void ReCreation::ai()
 void ReCreation::collisions()
 {
 	VECTOR2 collisionsVector;
-	
-	//if player collide planet
-	if(player.collidesWith(planet, collisionsVector))
-	{
-		//bound planet
-		player.bounce(collisionsVector, planet);
-		player.damage(PLANET);
-	}
-
-	//if player1 collide planet
-	if(player1.collidesWith(planet, collisionsVector))
-	{
-		//bound planet
-		player1.bounce(collisionsVector, planet);
-		player1.damage(PLANET);
-	}
-
-	//if collide players
-	if(player.collidesWith(player1, collisionsVector))
-	{
-		//player bound player1
-		player.bounce(collisionsVector, player1);
-		player.damage(SHIP);
-
-		//player 1 collide player
-		player1.bounce(collisionsVector, player);
-		player1.damage(SHIP);
-	}
 }
 
 //////////////////////////////////////////////////////////////////////////////

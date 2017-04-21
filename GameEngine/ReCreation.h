@@ -8,7 +8,6 @@
 #include "game.h"
 #include "TextureManager.h"
 #include "Image.h"
-#include "Planet.h"
 #include "Player.h"
 
 //////////////////////////////////////////////////////////////////////////////
@@ -22,8 +21,8 @@ class ReCreation :
 private:
 	//game items	
 	TextureManager playerTexture;	//texture of player
-	Player player, player1;						//image of player
-	Planet planet;					//the planet
+	Player player;						//image of player
+
 
 public:
 	ReCreation(void);

@@ -226,6 +226,6 @@ public:
 	void bounce(VECTOR2 &collisionVector, Entity &ent);
 
 	//Adds the gravitational force to the velocity vector of this entity
-	void gravityForce(Entity &other, float frameTime);
+	void gravityForce(Entity *ent, float frameTime);
 };
 
