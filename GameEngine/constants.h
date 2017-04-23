@@ -42,6 +42,14 @@ const float SCALE_RATE = 0.2f;					//scale change per second
 const float PLAYER_SPEED = 100.0f;					//how many pixels per second
 const float PLAYER_SCALE = 1.5f;						//starting ship scale
 
+//audio source
+//WAVE_BANK is location of .xwb
+const char WAVE_BANK[] = "audio\\Wave Bank.xwb";
+//SOUND_FILE is location of .xsb
+const char SOUND_BANK[] = "audio\\Sound Bank.xsb";
+//sound cue
+const char MAINBGM[] = "gamemain";
+
 //Key mapping
 //This game use simple constant value to key mapping
 //If use variable, save key mapping to data file, can reuse it

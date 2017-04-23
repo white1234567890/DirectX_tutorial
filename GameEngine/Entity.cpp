@@ -527,4 +527,16 @@ void Entity::gravityForce(Entity *ent, float frameTime)
 		pow((ent->getCenterY() - getCenterY()), 2);
 
 	force = gravity * ent->getMass() * mass / rr;
+
+	//create gravity vector use vector calculate between entity
+	VECTOR2 gravityV(ent->getCenterX() - getCenterX(), ent->getCenterY() - getCenterY());
+
+	//normalize
+	Graphics::Vector2Normalize(&gravityV);
+
+	//create gravity vector multiply force
+	gravityV *= force * frameTime;
+
+	//change direction of velocity add gravity vector
+	velocity += gravityV;
 }
