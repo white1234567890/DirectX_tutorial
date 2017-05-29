@@ -241,6 +241,15 @@ public:
 	//&texture : type of texture
 	HRESULT loadTexture(const char *filename, COLOR_ARGB transcolor, UINT &width, UINT &height, LP_TEXTURE &texture);
 
+	//Load texture to system memory (system memory can lock)
+	//this function be able to access directry to pixels data
+	//*filename : name of load file
+	//transcolor : ARGB
+	//&width : width
+	//&height : height
+	//&texture : type of texture
+	HRESULT loadTextureSystemMem(const char *filename, COLOR_ARGB transcolor, UINT &width, UINT &height, LP_TEXTURE &texture);
+
 	//return length of vector v
 	static float Vector2Length(const VECTOR2 *v) {return D3DXVec2Length(v);}
 

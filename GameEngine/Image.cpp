@@ -1,5 +1,5 @@
 //You Oyadomari
-//Kokusai Denshi Business Vocational School
+//Kokusai Denshi Business Colledge
 //Initial 2017/4/4
 //LastUpdate 2017/4/4
 

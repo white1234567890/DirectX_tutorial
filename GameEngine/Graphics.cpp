@@ -335,6 +335,64 @@ HRESULT Graphics::loadTexture(const char *filename, COLOR_ARGB transcolor, UINT 
 }
 
 //////////////////////////////////////////////////////////////////////////////
+//Load texture to system memory (system memory can lock)
+//this function be able to access directry to pixels data
+//use TextureManager class to load texture
+//pre:	filename is name of texture file
+//			transcolor is color to be treated as transparent
+//post:	width, height is texture size
+//			texture is pointer to texture
+//return HRESULT store data to TextureData structure
+//////////////////////////////////////////////////////////////////////////////
+HRESULT Graphics::loadTextureSystemMem(const char *filename, COLOR_ARGB transcolor, UINT &width, UINT &height, LP_TEXTURE &texture)
+{
+	//structure to load bit map file
+	D3DXIMAGE_INFO info;
+	result = E_FAIL;	//windows default return
+	try
+	{
+		if(filename == NULL)
+		{
+			texture = NULL;
+			return D3DERR_INVALIDCALL;
+		}
+
+		//get width and height frome bit map file
+		result = D3DXGetImageInfoFromFile(filename, &info);
+
+		if(result != D3D_OK)
+			return result;
+
+		width = info.Width;
+		height = info.Height;
+
+		//load bit map image file, then create new texture
+		result = D3DXCreateTextureFromFileEx(
+			device3d,					//3d device
+			filename,					//name of bit map file
+			info.Width,					//width of bit map image
+			info.Height,				//height of bit map image
+			1,								//mip map level (no chain is 1)
+			0,								//usage
+			D3DFMT_UNKNOWN,			//surface format (default)
+			D3DPOOL_SYSTEMMEM,	//system memory can lock
+			D3DX_DEFAULT,			//image filter
+			D3DX_DEFAULT,			//mip filter
+			transcolor,				//transeparate color key
+			&info,						//bit map file data
+			NULL,							//color paret
+			&texture);					//pointer to texture
+	}
+	catch(...)
+	{
+		throw GameError(gameErrorNS::FATAL_ERROR, "Error in Graphics::loadTextureSystemMem"));
+	}
+
+	return result;
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
 //return the number of pixels colliding between the two sprites
 //pre:	the device support a stencil buffer and pOcclusionQuery points to a valid occlusionQuery object
 //post:	returns the number of pixels of overlap

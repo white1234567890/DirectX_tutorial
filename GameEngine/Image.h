@@ -174,7 +174,7 @@ public:
 	//The current SpriteData.rect is used to select the texture
 	//sd:		SpriteData
 	//color:	color filter
-	virtual void draw(SpriteData sd, COLOR_ARGB color);
+	virtual void draw(SpriteData sd, COLOR_ARGB color = graphicsNS::WHITE);
 
 	//Update the animation
 	//frameTime is used to regulate the speed
