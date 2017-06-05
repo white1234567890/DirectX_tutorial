@@ -385,7 +385,7 @@ HRESULT Graphics::loadTextureSystemMem(const char *filename, COLOR_ARGB transcol
 	}
 	catch(...)
 	{
-		throw GameError(gameErrorNS::FATAL_ERROR, "Error in Graphics::loadTextureSystemMem"));
+		throw(GameError(gameErrorNS::FATAL_ERROR, "Error in Graphics::loadTextureSystemMem"));
 	}
 
 	return result;

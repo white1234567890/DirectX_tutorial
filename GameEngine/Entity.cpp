@@ -520,7 +520,7 @@ void Entity::bounce(VECTOR2 &collisionVector, Entity &ent)
 void Entity::gravityForce(Entity *ent, float frameTime)
 {
 	//if either entity is not active, do not effect gravity
-	if(!activate || !ent->getActive())
+	if(!active || !ent->getActive())
 		return ;
 
 	rr = pow((ent->getCenterX() - getCenterX()), 2) +

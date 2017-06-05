@@ -148,6 +148,11 @@ public:
 
     // Display character sprite described by spriteData using color and fill
     // Does underline and bold
+	//if backColor is not TRANSCOLOR, draw character that is defined SOLID
+	//then draw character ch
+	//if draw bold, draw character ch
+	//then location in screen X move right BOLD_SIZE, redraw character ch
+	//it must draw twise that draw baxk color, underline, and bold
     virtual void drawChar(UCHAR ch);
 
 	// Initialize font using file texture image.

@@ -9,6 +9,7 @@
 #define SAFE_RELEASE(ptr) {if(ptr) {(ptr)->Release(); (ptr) = NULL;}}
 #define SAFE_DELETE(ptr) {if(ptr) {delete (ptr); (ptr) = NULL;}}
 #define TRANSCOLOR SETCOLOR_ARGB(0,255,0,255)	//transparant color (magenta)
+#define LP_DXFONT   LPD3DXFONT
 
 //////////////////////////////////////////////////////////////////////////////
 //Constant

@@ -33,6 +33,7 @@ Text::Text(void) : Image()
 
 Text::~Text(void)
 {
+	Image::~Image();
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -146,6 +147,41 @@ bool Text::initialize(Graphics *g, const char *file)
 }
 
 //////////////////////////////////////////////////////////////////////////////
+//set x,y for text output
+//////////////////////////////////////////////////////////////////////////////
+void Text::setXY(int x2, int y2)
+{
+	if(x2 < 0 || y2 < 0)
+		return;
+	spriteData.x = (float)x2;
+	spriteData.y = (float)y2;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//print string at current x,y
+//pre:	spriteBegin()
+//post:	spriteEnd()
+//////////////////////////////////////////////////////////////////////////////
+void Text::print(const std::string &str)
+{
+	print(str, (int)spriteData.x, (int)spriteData.y);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//print with align at x,y
+//text is align as specified from:
+//LEFT, RIGHT, CENTER, CENTER_MIDDLE, CENTER_BOTTOM, LEFT_BOTTOM, RIGHT_BOTTOM
+//pre:	spriteBegin()
+//post:	spriteEnd()
+//////////////////////////////////////////////////////////////////////////////
+void Text::print(const std::string &str, int x, int y, textNS::Alignment al)
+{
+	align = al;	//save alignment
+	print(str, x, y);
+	align = textNS::LEFT;
+}
+
+//////////////////////////////////////////////////////////////////////////////
 //output string location X,Y
 //this function process proportional space and escape sequence
 //pre:	spriteBegin()
@@ -203,7 +239,7 @@ void Text::print(const std::string &str, int x, int y)
 					spriteData.rect.left = chN % textNS::COLUMNS * textNS::GRID_WIDTH + 1;
 					spriteData.rect.right = spriteData.rect.left + textNS::FONT_WIDTH;
 				}
-				//if do not ise width of font, make spece
+				//if do not use width of font, make space
 				else
 				{
 					width += proportionalSpacing;
@@ -378,6 +414,198 @@ void Text::doAlign(const std::string &str)
 //////////////////////////////////////////////////////////////////////////////
 void Text::getWidthHeight(const std::string &str, UINT &w, UINT &h)
 {
-	if(spriteData.texture == NULL)	//there is not texture
-		return;
+	UCHAR ch = 0;
+	UCHAR chN = 0;	//character index that location in texture(left top 0)
+	width = textNS::FONT_WIDTH;
+	int scaledWidth = static_cast<int>(textNS::FONT_WIDTH * spriteData.scale);	//width of character that was scaled
+	int strW = 0;
+	h = 0;
+	int stringWidth = 0;
+
+	//get all characters
+	for(UINT i = 0; i < str.length(); ++i)
+	{
+		ch = str.at(i);
+
+		//renderable character
+		if(ch > textNS::MIN_CHAR && ch <=textNS::MAX_CHAR)
+		{
+			chN = ch - textNS::MIN_CHAR;	//MIN_CHAR is index 0
+
+			//////////////////////////////////////////////////////////////////////////////
+			//if proportional output is effective,
+			//spriteData.rect.left and right are loaded from fontData array that store data prefare
+			//if character do not use width of font,
+			//proportionalSpacing add width, make space between characters that render proportional
+			//////////////////////////////////////////////////////////////////////////////
+			if(proportional)
+			{
+				spriteData.rect.left = fontData[chN / textNS::COLUMNS][chN % textNS::COLUMNS].left;
+				//DirectX needs right edge + 1
+				spriteData.rect.right = fontData[chN / textNS::COLUMNS][chN % textNS::COLUMNS].right + 1;
+
+				width = spriteData.rect.right - spriteData.rect.left + proportionalSpacing;
+
+				scaledWidth = static_cast<int>(width * spriteData.scale);
+			}
+			//////////////////////////////////////////////////////////////////////////////
+			//if proportional output is not effective,
+			//spriteData.rect.left is
+			//		character index(chN) % columns of texture(textNS::COLUMNS) * width of one character(textNS::GRID_WIDTH) + 1
+			//spriteData.rect.right is
+			//		left edge + width of one character that do not contain frame width
+			//rendering character is done by drawChar(ch)
+			//now location in screen X add width of character size that scaled
+			//////////////////////////////////////////////////////////////////////////////
+			else
+			{
+				width = textNS::FONT_WIDTH;
+				spriteData.rect.left = chN % textNS::COLUMNS * textNS::GRID_WIDTH + 1;
+				spriteData.rect.right = spriteData.rect.left + textNS::FONT_WIDTH;
+			}
+			spriteData.x += scaledWidth;
+		}
+		//unrenderable character
+		else
+		{
+			//check this character is escape sequence
+			switch (ch)
+			{
+			case ' ':	//space
+				//proportional space is effective
+				if(proportional)
+				{
+					//calculate poroportional space width and scaledWidth
+					width = textNS::FONT_WIDTH / 2;
+					scaledWidth = static_cast<int>(width * spriteData.scale);
+				}
+				//add location in screen X
+				spriteData.x += scaledWidth;
+				break;
+
+				//new line is down a line
+				//and set left edge to start positoin of X
+			case '\n':	//new line
+				if(strW == 0)
+					strW = stringWidth;
+				stringWidth = 0;
+				h += static_cast<int>(height * spriteData.scale);
+				break;
+
+			case '\r':	//return start position of X
+				if(strW == 0)
+					strW = stringWidth;
+				stringWidth = 0;
+				break;
+
+			case '\t':	//tab
+				{
+					width = textNS::FONT_WIDTH;
+					scaledWidth = static_cast<int>(width * spriteData.scale);
+					int tabX = static_cast<int>(spriteData.x) / (scaledWidth * tabSize);
+					tabX = (tabX + 1) * scaledWidth * tabSize;
+					int tabW = tabX - static_cast<int>(spriteData.x);
+					
+					while (tabW > 0)
+					{
+						if(tabW >= scaledWidth)
+						{
+							spriteData.x += scaledWidth;
+					}
+					else
+					{
+						//set tab position processing character fraction
+						width = tabW;
+						spriteData.x = tabW;
+						}
+						tabW -= scaledWidth;
+					}
+					break;
+				}
+
+			case '\b':	//back space
+				stringWidth -= scaledWidth;
+				//do not erace character
+				if(stringWidth < 0)
+					stringWidth = 0;
+				break;
+
+			case 0x01:	//font signature
+				stringWidth += scaledWidth;
+				break;
+			}
+		}
+	}
+	if(strW == 0)
+		strW = stringWidth;
+	w = strW;
+	return;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//draw using character sprite and fill by spriteData
+//draw underline and bold
+//////////////////////////////////////////////////////////////////////////////
+void Text::drawChar(UCHAR ch)
+{
+	SpriteData sd2 = spriteData;	//copy spriteData
+	//draw backColor
+	//if backColor is not transeparate
+	if(backColor != TRANSCOLOR)
+	{
+		spriteData.rect.top = (textNS::SOLID - textNS::MIN_CHAR) / textNS::COLUMNS * textNS::GRID_HEIGHT + 1;
+		spriteData.rect.bottom = spriteData.rect.top + textNS::GRID_HEIGHT - 2;
+		spriteData.rect.left = (textNS::SOLID - textNS::MIN_CHAR) % textNS::COLUMNS * textNS::GRID_WIDTH + 1;
+		spriteData.rect.right = spriteData.rect.left + width;
+		draw(backColor);	//draw backColor
+		spriteData.rect = sd2.rect;	//restorate character rectangle
+	}
+	//draw underline
+	if(underline)
+	{
+		spriteData.rect.top = (textNS::UNDERLINE - textNS::MIN_CHAR) / textNS::COLUMNS * textNS::GRID_HEIGHT + 1;
+		spriteData.rect.bottom = spriteData.rect.top + textNS::GRID_HEIGHT - 2;
+		spriteData.rect.left = (textNS::UNDERLINE - textNS::MIN_CHAR) % textNS::COLUMNS * textNS::GRID_WIDTH + 1;
+		spriteData.rect.right = spriteData.rect.left + width;
+		draw(color);
+		spriteData.rect = sd2.rect;	//restorate character rectangle
+	}
+	//draw character
+	//if renderable character
+	if(ch > textNS::MIN_CHAR && ch <= textNS::MAX_CHAR)
+	{
+		draw(spriteData, color);
+		if(bold)	//if bold, draw twice use offset X
+		{
+			spriteData.x += textNS::BOLD_SIZE * spriteData.scale;
+			draw(spriteData, color);
+			spriteData.x = sd2.x;
+		}
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//called when graphics device is lost
+//////////////////////////////////////////////////////////////////////////////
+void Text::onLostDevice()
+{
+	try
+	{
+		if(!initialized)
+			return;
+		fontTexture.onLostDevice();
+	}catch(...){}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//called when graphics device is reset
+//////////////////////////////////////////////////////////////////////////////
+void Text::onResetDevice()
+{
+	try
+	{
+		if(!initialized)
+			return;
+		fontTexture.onResetDevice();
+	}catch(...){}
 }
